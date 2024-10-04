@@ -6,15 +6,15 @@
     },
     {
       "name": "elevated-rails",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "quality",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "space-age",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "atomic_pickaxe",
@@ -26,7 +26,7 @@
     },
     {
       "name": "ColorblindCircuitNetwork",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "debugadapter",
@@ -34,7 +34,7 @@
     },
     {
       "name": "EditorExtensions",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "Electronic_Locomotives",
@@ -42,23 +42,23 @@
     },
     {
       "name": "factoryplanner",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "flib",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "global-power-network",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "more-achievements",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "research-complete",
-      "enabled": false
+      "enabled": true
     }
   ]
 }
