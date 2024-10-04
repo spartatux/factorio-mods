@@ -1,0 +1,11 @@
+{
+    "name": "research-complete",
+    "version": "0.0.2",
+    "title": "Research Complete",
+    "author": "LuziferSenpai",
+    "contact": "",
+    "homepage": "",
+    "description": "Changes the research complete sound back to first one Factorio had.",
+    "dependencies": ["base"],
+    "factorio_version": "1.2"
+}
