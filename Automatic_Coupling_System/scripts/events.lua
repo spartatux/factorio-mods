@@ -1,15 +1,13 @@
 local coupleSignalId = { type = "virtual", name = "signal-couple" }
 local decoupleSignalId = { type = "virtual", name = "signal-decouple" }
 local railDirectionDefine = defines.rail_direction
-local wireTypeDefine = defines.wire_type
+local wireConnectorIdDefine = defines.wire_connector_id
 local eventsDefine = defines.events
 local eventsLib = {}
 
--- This lib is exclusively for the use inside the tutorial scenarios
-
 local function checkCircuitNetworkHasSignal(entity, signalId)
-    local redCircuitNetwork = entity.get_circuit_network(wireTypeDefine.red)
-    local greenCircuitNetwork = entity.get_circuit_network(wireTypeDefine.green)
+    local redCircuitNetwork = entity.get_circuit_network(wireConnectorIdDefine.circuit_red)
+    local greenCircuitNetwork = entity.get_circuit_network(wireConnectorIdDefine.circuit_green)
 
     if redCircuitNetwork then
         if redCircuitNetwork.get_signal(signalId) ~= 0 then
@@ -19,6 +17,8 @@ local function checkCircuitNetworkHasSignal(entity, signalId)
 
     if greenCircuitNetwork then
         if greenCircuitNetwork.get_signal(signalId) ~= 0 then
+            game.print("greenNetwork has signal")
+
             return true
         end
     end
@@ -39,8 +39,8 @@ local function checkCircuitNetworkHasSignals(train)
 end
 
 local function getCircuitNetworkSingalValue(entity, signalId)
-    local redCircuitNetwork = entity.get_circuit_network(wireTypeDefine.red)
-    local greenCircuitNetwork = entity.get_circuit_network(wireTypeDefine.green)
+    local redCircuitNetwork = entity.get_circuit_network(wireConnectorIdDefine.circuit_red)
+    local greenCircuitNetwork = entity.get_circuit_network(wireConnectorIdDefine.circuit_green)
     local signalValue = 0
 
     if redCircuitNetwork then
@@ -60,8 +60,7 @@ local function matchEntityOrientation(entityAOrientation, entityBOrientation)
 end
 
 local function getOrienationBetweenTwoPositions(entityAPosition, entityBPosition)
-    return (math.atan2(entityBPosition.y - entityAPosition.y, entityBPosition.x - entityAPosition.x) / 2 / math.pi + 0.25) %
-        1
+    return (math.atan2(entityBPosition.y - entityAPosition.y, entityBPosition.x - entityAPosition.x) / 2 / math.pi + 0.25) % 1
 end
 
 local function getTileDistanceBetweenTwoPositions(positionA, positionB)
@@ -149,10 +148,10 @@ end
 
 local function doTrainCoupleLogic(train)
     local trainIdString = tostring(train.id)
-    local globalTainData = global.automaticTrainIds[trainIdString]
-    local stationEntity = globalTainData.station
+    local storageTainData = storage.automaticTrainIds[trainIdString]
+    local stationEntity = storageTainData.station
 
-    global.automaticTrainIds[trainIdString] = nil
+    storage.automaticTrainIds[trainIdString] = nil
 
     if stationEntity and stationEntity.valid then
         local trainFrontEntity, trainBackEntity = getFrontBackTrainEntity(train, stationEntity)
@@ -184,8 +183,8 @@ local function doTrainCoupleLogic(train)
         end
 
         if didChange then
-            frontTrain = trainFrontEntity.train
-            backTrain = trainBackEntity.train
+            local frontTrain = trainFrontEntity.train
+            local backTrain = trainBackEntity.train
 
             frontTrain.schedule = trainSchedule
             backTrain.schedule = trainSchedule
@@ -201,25 +200,25 @@ end
 
 eventsLib.events = {
     [eventsDefine.on_game_created_from_scenario] = function()
-        global.automaticTrainIds = global.automaticTrainIds or {}
+        storage.automaticTrainIds = storage.automaticTrainIds or {}
     end,
     [eventsDefine.on_train_created] = function(eventData)
         local newTrainId = tostring(eventData.train.id)
         local oldTrainId1 = tostring(eventData.old_train_id_1)
         local oldTrainId2 = tostring(eventData.old_train_id_2)
 
-        if global.automaticTrainIds[oldTrainId1] then
-            global.automaticTrainIds[newTrainId] = global.automaticTrainIds[oldTrainId1]
-        elseif global.automaticTrainIds[oldTrainId2] then
-            global.automaticTrainIds[newTrainId] = global.automaticTrainIds[oldTrainId2]
+        if storage.automaticTrainIds[oldTrainId1] then
+            storage.automaticTrainIds[newTrainId] = storage.automaticTrainIds[oldTrainId1]
+        elseif storage.automaticTrainIds[oldTrainId2] then
+            storage.automaticTrainIds[newTrainId] = storage.automaticTrainIds[oldTrainId2]
         end
 
-        if global.automaticTrainIds[oldTrainId1] then
-            global.automaticTrainIds[oldTrainId1] = nil
+        if storage.automaticTrainIds[oldTrainId1] then
+            storage.automaticTrainIds[oldTrainId1] = nil
         end
 
-        if global.automaticTrainIds[oldTrainId2] then
-            global.automaticTrainIds[oldTrainId2] = nil
+        if storage.automaticTrainIds[oldTrainId2] then
+            storage.automaticTrainIds[oldTrainId2] = nil
         end
     end,
     [eventsDefine.on_train_changed_state] = function(eventData)
@@ -228,16 +227,16 @@ eventsLib.events = {
 
         if train.state == waitStationDefine then
             if checkCircuitNetworkHasSignals(train) then
-                global.automaticTrainIds[tostring(train.id)] = { station = train.station }
+                storage.automaticTrainIds[tostring(train.id)] = { station = train.station }
             end
 
             return
         end
 
         if eventData.old_state == waitStationDefine then
-            local globalTainData = global.automaticTrainIds[tostring(train.id)]
+            local storageTainData = storage.automaticTrainIds[tostring(train.id)]
 
-            if globalTainData and not globalTainData.modded then
+            if storageTainData then
                 doTrainCoupleLogic(train)
             end
         end
@@ -245,13 +244,13 @@ eventsLib.events = {
 }
 
 eventsLib.on_init = function()
-    global.automaticTrainIds = global.automaticTrainIds or {}
+    storage.automaticTrainIds = storage.automaticTrainIds or {}
 end
 
 script.on_configuration_changed(function(eventData)
     local modChanges = eventData.mod_changes
 
-    global.automaticTrainIds = global.automaticTrainIds or {}
+    storage.automaticTrainIds = storage.automaticTrainIds or {}
 
     if modChanges then
         local atcChanges = modChanges["Automatic_Coupling_System"]
@@ -261,51 +260,38 @@ script.on_configuration_changed(function(eventData)
 
             if oldAtcVersion and atcChanges.new_version then
                 if oldAtcVersion <= "0.2.3" then
-                    local trainIds = global.TrainsID
+                    local trainIds = storage.TrainsID
 
-                    global.TrainsID = nil
+                    storage.TrainsID = nil
 
                     if next(trainIds) then
                         for trainId, tableData in pairs(trainIds) do
-                            global.automaticTrainIds[tostring(trainId)] = { station = tableData.s, modded = tableData.m }
+                            storage.automaticTrainIds[tostring(trainId)] = { station = tableData.s }
                         end
                     end
                 end
 
                 if oldAtcVersion > "0.2.3" and oldAtcVersion < "2.0.0" then
-                    local trainIds = global.TrainsID
+                    local trainIds = storage.TrainsID
 
-                    global.TrainsID = nil
+                    storage.TrainsID = nil
 
                     if next(trainIds) then
                         for trainId, tableData in pairs(trainIds) do
-                            global.automaticTrainIds[tostring(trainId)] = { station = tableData.station, modded = tableData.mod }
+                            storage.automaticTrainIds[tostring(trainId)] = { station = tableData.station }
                         end
                     end
                 end
 
                 if oldAtcVersion > "2.0.0" and oldAtcVersion < "2.0.3" then
-                    if not global.automaticTrainIds then
-                        global.automaticTrainIds = global.trainIds
-                        global.trainIds = nil
+                    if not storage.automaticTrainIds then
+                        storage.automaticTrainIds = storage.trainIds
+                        storage.trainIds = nil
                     end
                 end
             end
         end
     end
 end)
-
-remote.add_interface("automaticCoupling", {
-    checkCoupleSignals = function(train)
-        if checkCircuitNetworkHasSignals(train) then
-            global.automaticTrainIds[tostring(train.id)] = { station = train.station, modded = true }
-
-            return true
-        end
-
-        return false
-    end,
-    doTrainCoupleLogic = doTrainCoupleLogic
-})
 
 return eventsLib
