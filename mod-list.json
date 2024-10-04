@@ -1,0 +1,76 @@
+
+{
+  "mods": 
+  [
+    
+    {
+      "name": "base",
+      "enabled": true
+    },
+    
+    {
+      "name": "elevated-rails",
+      "enabled": true
+    },
+    
+    {
+      "name": "quality",
+      "enabled": true
+    },
+    
+    {
+      "name": "space-age",
+      "enabled": true
+    },
+    
+    {
+      "name": "atomic_pickaxe",
+      "enabled": false
+    },
+    
+    {
+      "name": "Automatic_Coupling_System",
+      "enabled": false
+    },
+    
+    {
+      "name": "ColorblindCircuitNetwork",
+      "enabled": true
+    },
+    
+    {
+      "name": "debugadapter",
+      "enabled": false
+    },
+    
+    {
+      "name": "Electronic_Locomotives",
+      "enabled": false
+    },
+    
+    {
+      "name": "factoryplanner",
+      "enabled": true
+    },
+    
+    {
+      "name": "flib",
+      "enabled": true
+    },
+    
+    {
+      "name": "global-power-network",
+      "enabled": true
+    },
+    
+    {
+      "name": "more-achievements",
+      "enabled": true
+    },
+    
+    {
+      "name": "research-complete",
+      "enabled": true
+    }
+  ]
+}
