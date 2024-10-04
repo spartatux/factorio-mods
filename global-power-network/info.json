@@ -1,0 +1,14 @@
+{
+    "name": "global-power-network",
+    "version": "0.0.1",
+    "title": "Global Power Network",
+    "author": "LuziferSenpai",
+    "contact": "",
+    "homepage": "",
+    "description": "Removes the need for power poles. With different mod settings.",
+    "dependencies": [
+        "base >= 1.2.27",
+        "space-age >= 1.2.27"
+    ],
+    "factorio_version": "1.2"
+}
