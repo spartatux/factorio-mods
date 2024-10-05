@@ -18,7 +18,7 @@
     },
     {
       "name": "atomic_pickaxe",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "Automatic_Coupling_System",
