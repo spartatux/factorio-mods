@@ -156,6 +156,7 @@ local function doTrainCoupleLogic(train)
     if stationEntity and stationEntity.valid then
         local trainFrontEntity, trainBackEntity = getFrontBackTrainEntity(train, stationEntity)
         local trainSchedule = train.schedule
+        local trainGroup = train.group
         local didCouple = false
         local didChange = false
 
@@ -186,8 +187,16 @@ local function doTrainCoupleLogic(train)
             local frontTrain = trainFrontEntity.train
             local backTrain = trainBackEntity.train
 
-            frontTrain.schedule = trainSchedule
-            backTrain.schedule = trainSchedule
+            if (#trainGroup > 0) then
+                frontTrain.group = trainGroup
+                backTrain.group = trainGroup
+
+                frontTrain.go_to_station(trainSchedule.current)
+                backTrain.go_to_station(trainSchedule.current)
+            else
+                frontTrain.schedule = trainSchedule
+                backTrain.schedule = trainSchedule
+            end
 
             local frontTrainLocomotives = frontTrain.locomotives
             local backTrainLocomotives = backTrain.locomotives
