@@ -24,10 +24,10 @@ standardLocomotiveItem.place_result = name
 
 standardLocomotiveRecipe.name = name
 standardLocomotiveRecipe.ingredients = {
-    { "locomotive",           1 },
-    { "battery",              10 },
-    { "electric-engine-unit", 20 }
+    { type = "item", name = "locomotive",           amount = 1 },
+    { type = "item", name = "battery",              amount = 10 },
+    { type = "item", name = "electric-engine-unit", amount = 20 }
 }
-standardLocomotiveRecipe.result = name
+standardLocomotiveRecipe.results = {{ type = "item", name = name, amount = 1 }}
 
 return { standardLocomotiveEntity, standardLocomotiveItem, standardLocomotiveRecipe }

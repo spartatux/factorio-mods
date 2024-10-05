@@ -30,10 +30,10 @@ cargoLocomotiveItem.place_result = name
 
 cargoLocomotiveRecipe.name = name
 cargoLocomotiveRecipe.ingredients = {
-    { "electronic-standard-locomotive", 1 },
-    { "battery",                        20 },
-    { "electric-engine-unit",           20 }
+    { type = "item", name = "electronic-standard-locomotive", amount = 1 },
+    { type = "item", name = "battery",                        amount = 20 },
+    { type = "item", name = "electric-engine-unit",           amount = 20 }
 }
-cargoLocomotiveRecipe.result = name
+cargoLocomotiveRecipe.results = {{ type = "item", name = name, amount = 1 }}
 
 return { cargoLocomotiveEntity, cargoLocomotiveItem, cargoLocomotiveRecipe }

@@ -1,16 +1,11 @@
 local quene = require("__Electronic_Locomotives__/scripts/quene")
-local util = require("__Electronic_Locomotives__/scripts/util")
+local flibMath = require("__flib__/math")
 local flibMigration = require("__flib__/migration")
 local flibTable = require("__flib__/table")
 local trainStateDefine = defines.train_state
 local eventsDefine = defines.events
 local fuelValue = 10000000
 local eventsLib = {}
-local blacklistSurfaces = {
-    ["_BPEX_Temp_Surface"] = true,
-    ["bp-editor-surface"] = true,
-    ["trainConstructionSite"] = true
-}
 local queneMetatable = {
     __index = quene
 }
@@ -32,18 +27,11 @@ local function getFuel(force)
     return fuel
 end
 
-local function isSurfaceNotBlacklisted(surfaceName)
-    if surfaceName:find("^Factory floor") then return false end
-    if blacklistSurfaces[surfaceName] then return false end
-
-    return true
-end
-
 local function removeFromQuene(unitNumberString)
-    local gameTick = global.locomotives[unitNumberString]
+    local gameTick = storage.locomotives[unitNumberString]
 
-    global.updateQuene:remove(gameTick, unitNumberString)
-    global.locomotives[unitNumberString] = nil
+    storage.updateQuene:remove(gameTick, unitNumberString)
+    storage.locomotives[unitNumberString] = nil
 end
 
 local function onEntityCreated(eventData)
@@ -51,88 +39,92 @@ local function onEntityCreated(eventData)
     local surface = entity.surface
 
     if not (entity and entity.valid) then return end
-    if not isSurfaceNotBlacklisted(surface.name) then return end
+    if not game.planets[surface.name] then return end
 
     local entityName = entity.name
     local unitNumberString = tostring(entity.unit_number)
     local gameTick = game.tick + 1
 
-    if global.locomotiveLookup[entityName] then
-        global.updateQuene:add(entity, gameTick, unitNumberString)
-        global.locomotives[unitNumberString] = gameTick
-    elseif global.providerLookup[entityName] then
-        global.providers[tostring(entity.force_index)][tostring(surface.index)][unitNumberString] = entity
+    if storage.locomotiveLookup[entityName] then
+        storage.updateQuene:add(entity, gameTick, unitNumberString)
+        storage.locomotives[unitNumberString] = gameTick
+    elseif storage.providerLookup[entityName] then
+        storage.providers[tostring(entity.force_index)][tostring(surface.index)][unitNumberString] = entity
     end
 end
 
 local function onSurfaceCreated(eventData)
     local surface = game.surfaces[eventData.surface_index]
 
-    if isSurfaceNotBlacklisted(surface.name) then
+    if game.planets[surface.name] then
         local surfaceIndexString = tostring(eventData.surface_index)
 
-        for _, providerForce in pairs(global.providers) do
+        for _, providerForce in pairs(storage.providers) do
             providerForce[surfaceIndexString] = {}
         end
     end
 end
 
 local function initGlobals()
-    local locomotiveList = game.item_prototypes["electronic-locomotive-list"]
-    local providerList = game.item_prototypes["electronic-provider-list"]
+    local locomotiveList = prototypes.item["electronic-locomotive-list"].get_entity_filters(defines.selection_mode.select)
+    local providerList = prototypes.item["electronic-provider-list"].get_entity_filters(defines.selection_mode.select)
     local nameFilter = {}
 
-    global.players = global.players or {}
-    global.fuel = global.fuel or {}
-    global.updateQuene = global.updateQuene or {}
-    global.locomotives = global.locomotives or {}
-    global.providers = global.providers or {}
-    global.locomotiveLookup = {}
-    global.providerLookup = {}
+    storage.players = storage.players or {}
+    storage.fuel = storage.fuel or {}
+    storage.updateQuene = storage.updateQuene or {}
+    storage.locomotives = storage.locomotives or {}
+    storage.providers = storage.providers or {}
+    storage.locomotiveLookup = {}
+    storage.providerLookup = {}
 
-    setmetatable(global.updateQuene, queneMetatable)
+    setmetatable(storage.updateQuene, queneMetatable)
 
-    for name, locomotive in pairs(locomotiveList.entity_filters) do
-        global.locomotiveLookup[name] = util.round(locomotive.max_energy_usage / 16.6666666667, 0)
+    if locomotiveList then
+        for _, locomotive in pairs(locomotiveList) do
+            storage.locomotiveLookup[locomotive.name] = flibMath.round(locomotive.get_max_energy_usage() / 16.6666666667, 0)
 
-        table.insert(nameFilter, name)
+            table.insert(nameFilter, locomotive.name)
+        end
     end
 
-    for name, _ in pairs(providerList.entity_filters) do
-        global.providerLookup[name] = true
+    if providerList then
+        for _, provider in pairs(providerList) do
+            storage.providerLookup[provider.name] = true
 
-        table.insert(nameFilter, name)
+            table.insert(nameFilter, provider.name)
+        end
     end
 
     for _, force in pairs(game.forces) do
         local forceIndexString = tostring(force.index)
 
-        global.fuel[forceIndexString] = getFuel(force)
-        global.providers[forceIndexString] = global.providers[forceIndexString] or {}
+        storage.fuel[forceIndexString] = getFuel(force)
+        storage.providers[forceIndexString] = storage.providers[forceIndexString] or {}
     end
 
     for _, surface in pairs(game.surfaces) do
         local surfaceIndexString = tostring(surface.index)
 
-        if isSurfaceNotBlacklisted(surface.name) then
+        if game.planets[surface.name] then
             local entities = surface.find_entities_filtered({ name = nameFilter })
 
-            for _, providerForce in pairs(global.providers) do
+            for _, providerForce in pairs(storage.providers) do
                 providerForce[surfaceIndexString] = providerForce[surfaceIndexString] or {}
             end
 
             if next(entities) then
                 for _, entity in pairs(entities) do
-                    if entity.type == "locomotive" and not global.locomotives[tostring(entity.unit_number)] then
+                    if entity.type == "locomotive" and not storage.locomotives[tostring(entity.unit_number)] then
                         onEntityCreated({ entity = entity })
-                    elseif entity.type == "electric-energy-interface" and not global.providers[tostring(entity.force_index)][tostring(entity.surface.index)][tostring(entity.unit_number)] then
+                    elseif entity.type == "electric-energy-interface" and not storage.providers[tostring(entity.force_index)][tostring(entity.surface.index)][tostring(entity.unit_number)] then
                         onEntityCreated({ entity = entity })
                     end
                 end
             end
         else
-            if global.providers[surfaceIndexString] then
-                global.providers[surfaceIndexString] = nil
+            if storage.providers[surfaceIndexString] then
+                storage.providers[surfaceIndexString] = nil
             end
         end
     end
@@ -152,7 +144,7 @@ eventsLib.events = {
     [eventsDefine.on_surface_deleted] = function(eventData)
         local surfaceIndexString = tostring(eventData.surface_index)
 
-        for _, providerForce in pairs(global.providers) do
+        for _, providerForce in pairs(storage.providers) do
             providerForce[surfaceIndexString] = nil
         end
     end,
@@ -162,14 +154,14 @@ eventsLib.events = {
         local force = eventData.force
         local forceIndexString = tostring(force.index)
 
-        global.fuel[forceIndexString] = getFuel(force)
-        global.providers[forceIndexString] = global.providers[forceIndexString] or {}
+        storage.fuel[forceIndexString] = getFuel(force)
+        storage.providers[forceIndexString] = storage.providers[forceIndexString] or {}
 
         for _, surface in pairs(game.surfaces) do
             local surfaceIndexString = tostring(surface.index)
 
-            if isSurfaceNotBlacklisted(surface.name) then
-                for _, providerForce in pairs(global.providers) do
+            if game.planets[surface.name] then
+                for _, providerForce in pairs(storage.providers) do
                     providerForce[surfaceIndexString] = providerForce[surfaceIndexString] or {}
                 end
             end
@@ -180,12 +172,12 @@ eventsLib.events = {
         local sourceForceIndexString = tostring(eventData.source_index)
         local destinationForceIndexString = tostring(destinationForce.index)
 
-        global.fuel[destinationForceIndexString] = getFuel(destinationForce)
+        storage.fuel[destinationForceIndexString] = getFuel(destinationForce)
 
         for _, surface in pairs(game.surfaces) do
             local surfaceIndexString = tostring(surface.index)
 
-            global.providers[destinationForceIndexString][surfaceIndexString] = flibTable.deep_merge(global.providers[sourceForceIndexString][surfaceIndexString], global.providers[destinationForceIndexString][surfaceIndexString])
+            storage.providers[destinationForceIndexString][surfaceIndexString] = flibTable.deep_merge(storage.providers[sourceForceIndexString][surfaceIndexString], storage.providers[destinationForceIndexString][surfaceIndexString])
         end
     end,
 
@@ -195,13 +187,13 @@ eventsLib.events = {
         local researchName = research.name
 
         if researchName == "electronic-locomotives-6" then
-            global.fuel[tostring(research.force.index)] = "electronic-fuel-5"
+            storage.fuel[tostring(research.force.index)] = "electronic-fuel-5"
         elseif researchName == "electronic-locomotives-5" then
-            global.fuel[tostring(research.force.index)] = "electronic-fuel-4"
+            storage.fuel[tostring(research.force.index)] = "electronic-fuel-4"
         elseif researchName == "electronic-locomotives-4" then
-            global.fuel[tostring(research.force.index)] = "electronic-fuel-3"
+            storage.fuel[tostring(research.force.index)] = "electronic-fuel-3"
         elseif researchName == "electronic-locomotives-3" then
-            global.fuel[tostring(research.force.index)] = "electronic-fuel-2"
+            storage.fuel[tostring(research.force.index)] = "electronic-fuel-2"
         end
     end,
     [eventsDefine.on_train_changed_state] = function(eventData)
@@ -210,7 +202,7 @@ eventsLib.events = {
 
         if (trainState == trainStateDefine.wait_signal or trainState == trainStateDefine.wait_station) then return end
 
-        local locomotiveLookup = global.locomotiveLookup
+        local locomotiveLookup = storage.locomotiveLookup
         local locomotives = flibTable.array_merge({ train.locomotives.front_movers, train.locomotives.back_movers })
         local locomotiveUpdateList = {}
 
@@ -224,30 +216,30 @@ eventsLib.events = {
 
         if ((trainState == trainStateDefine.arrive_signal or trainState == trainStateDefine.arrive_station) or (train.speed == 0 and trainState ~= trainStateDefine.on_the_path)) then
             for unitNumberString, _ in pairs(locomotiveUpdateList) do
-                if global.locomotives[unitNumberString] then removeFromQuene(unitNumberString) end
+                if storage.locomotives[unitNumberString] then removeFromQuene(unitNumberString) end
             end
         else
             local gameTick = game.tick
 
             for unitNumberString, locomotive in pairs(locomotiveUpdateList) do
-                if global.locomotives[unitNumberString] then removeFromQuene(unitNumberString) end
+                if storage.locomotives[unitNumberString] then removeFromQuene(unitNumberString) end
 
                 local burner = locomotive.burner
                 local fuelTick = math.floor(burner.remaining_burning_fuel / burner.heat_capacity)
                 local nextFuelTick = gameTick + (fuelTick > 0 and fuelTick or 1)
 
-                global.updateQuene:add(locomotive, nextFuelTick, unitNumberString)
-                global.locomotives[unitNumberString] = nextFuelTick
+                storage.updateQuene:add(locomotive, nextFuelTick, unitNumberString)
+                storage.locomotives[unitNumberString] = nextFuelTick
             end
         end
     end,
     [eventsDefine.on_tick] = function(eventData)
-        if not next(global.locomotives) then return end
+        if not next(storage.locomotives) then return end
 
         local gameTick = eventData.tick
-        local updateQuene = global.updateQuene[gameTick]
+        local updateQuene = storage.updateQuene[gameTick]
 
-        global.updateQuene[gameTick] = nil
+        storage.updateQuene[gameTick] = nil
 
         if not (updateQuene and next(updateQuene)) then return end
 
@@ -258,7 +250,7 @@ eventsLib.events = {
                 local newFuelAmount = missingFuel
                 local surfaceIndexString = tostring(locomotive.surface.index)
                 local forceIndexString = tostring(locomotive.force_index)
-                local providers = global.providers[forceIndexString][surfaceIndexString]
+                local providers = storage.providers[forceIndexString][surfaceIndexString]
                 local nextFuelTick = gameTick + 1
 
                 if next(providers) then
@@ -278,7 +270,7 @@ eventsLib.events = {
                                 provider.energy = 0
                             end
                         else
-                            global.providers[forceIndexString][surfaceIndexString][providerUnitNumberString] = nil
+                            storage.providers[forceIndexString][surfaceIndexString][providerUnitNumberString] = nil
                         end
                     end
 
@@ -288,19 +280,19 @@ eventsLib.events = {
 
                         nextFuelTick = gameTick + (fuelTick > 0 and fuelTick or 1)
 
-                        burner.currently_burning = global.fuel[forceIndexString]
+                        burner.currently_burning = storage.fuel[forceIndexString]
                         burner.remaining_burning_fuel = remainingBurningFuel
                     end
                 end
 
                 if locomotive.speed == 0 and locomotive.train.state == trainStateDefine.manual_control and nextFuelTick > gameTick + 1 then
-                    global.locomotives[locomotiveUnitNumberString] = nil
+                    storage.locomotives[locomotiveUnitNumberString] = nil
                 else
-                    global.updateQuene:add(locomotive, nextFuelTick, locomotiveUnitNumberString)
-                    global.locomotives[locomotiveUnitNumberString] = nextFuelTick
+                    storage.updateQuene:add(locomotive, nextFuelTick, locomotiveUnitNumberString)
+                    storage.locomotives[locomotiveUnitNumberString] = nextFuelTick
                 end
             else
-                global.locomotives[locomotiveUnitNumberString] = nil
+                storage.locomotives[locomotiveUnitNumberString] = nil
             end
         end
     end
@@ -311,8 +303,8 @@ eventsLib.on_init = function()
 end
 
 eventsLib.on_load = function()
-    if global.updateQuene then
-        setmetatable(global.updateQuene, queneMetatable)
+    if storage.updateQuene then
+        setmetatable(storage.updateQuene, queneMetatable)
     end
 end
 
@@ -329,7 +321,7 @@ eventsLib.on_configuration_changed = function(eventData)
 
     local electronicVersionMigration = {
         ["0.3.14"] = function()
-            local scriptData = global.script_data
+            local scriptData = storage.script_data
             local guis = scriptData.guis
 
             for _, player in (game.players) do
@@ -340,10 +332,10 @@ eventsLib.on_configuration_changed = function(eventData)
                 end
             end
 
-            global.script_data = nil
+            storage.script_data = nil
         end,
         ["1.0.5"] = function()
-            local scriptData = global.script_data
+            local scriptData = storage.script_data
 
             if next(scriptData) then
                 for _, player in (scriptData.players) do
@@ -352,7 +344,7 @@ eventsLib.on_configuration_changed = function(eventData)
                 end
             end
 
-            global.script_data = nil
+            storage.script_data = nil
         end
     }
 

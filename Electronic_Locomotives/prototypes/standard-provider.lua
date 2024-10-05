@@ -62,10 +62,10 @@ standardProviderItem.place_result = name
 
 standardProviderRecipe.name = name
 standardProviderRecipe.ingredients = {
-    { "accumulator",        5 },
-    { "battery",            10 },
-    { "electronic-circuit", 20 }
+    { type = "item", name = "accumulator",        amount = 5 },
+    { type = "item", name = "battery",            amount = 10 },
+    { type = "item", name = "electronic-circuit", amount = 20 }
 }
-standardProviderRecipe.result = name
+standardProviderRecipe.results = {{ type = "item", name = name, amount = 1 }}
 
 return { standardProviderEntity, standardProviderItem, standardProviderRecipe }

@@ -3,36 +3,48 @@ local providers = data.raw["electric-energy-interface"]
 local locomotiveList = {}
 local providerList = {}
 
-data:extend{
+data:extend {
     {
         type = "selection-tool",
         name = "electronic-locomotive-list",
-        flags = { "hidden" },
         icon = "__flib__/graphics/empty.png",
         icon_size = 1,
-        entity_filters = locomotiveList,
         stack_size = 1,
-        selection_color = {},
-        alt_selection_color = {},
-        selection_mode = { "any-entity" },
-        alt_selection_mode = { "any-entity" },
-        selection_cursor_box_type = "entity",
-        alt_selection_cursor_box_type = "entity"
+        hidden = true,
+        hidden_in_factoriopedia = true,
+        select = {
+            border_color = {},
+            cursor_box_type = "entity",
+            mode = "any-entity",
+            entity_filters = locomotiveList,
+        },
+        alt_select = {
+            border_color = {},
+            cursor_box_type = "entity",
+            mode = "any-entity",
+            entity_filters = locomotiveList,
+        }
     },
     {
         type = "selection-tool",
         name = "electronic-provider-list",
-        flags = { "hidden" },
         icon = "__flib__/graphics/empty.png",
         icon_size = 1,
-        entity_filters = providerList,
         stack_size = 1,
-        selection_color = {},
-        alt_selection_color = {},
-        selection_mode = { "any-entity" },
-        alt_selection_mode = { "any-entity" },
-        selection_cursor_box_type = "entity",
-        alt_selection_cursor_box_type = "entity"
+        hidden = true,
+        hidden_in_factoriopedia = true,
+        select = {
+            border_color = {},
+            cursor_box_type = "entity",
+            mode = "any-entity",
+            entity_filters = providerList,
+        },
+        alt_select = {
+            border_color = {},
+            cursor_box_type = "entity",
+            mode = "any-entity",
+            entity_filters = providerList,
+        }
     }
 }
 
@@ -40,9 +52,10 @@ for _, locomotive in pairs(locomotives) do
     if locomotive.is_electronic then
         table.insert(locomotiveList, locomotive.name)
 
-        locomotive.burner = {
-            fuel_category = "electronic",
-            effictivity = 1,
+        locomotive.energy_source = {
+            type = "burner",
+            fuel_categories = { "electronic" },
+            effectivity = 1,
             fuel_inventory_size = 1
         }
     end

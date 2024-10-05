@@ -42,7 +42,7 @@ local electronicTechnologyData = {
         },
     },
     {
-        localised_description = { "electronic-locomotives.description", 1.2, 1.05 },
+        localised_description = { "electronic-locomotives.description", "1.2", "1.05" },
         unit = {
             count = 1000,
             time = 60,
@@ -55,7 +55,7 @@ local electronicTechnologyData = {
         },
     },
     {
-        localised_description = { "electronic-locomotives.description", 1.8, 1.15 },
+        localised_description = { "electronic-locomotives.description", "1.8", "1.15" },
         unit = {
             count = 1200,
             time = 60,
@@ -69,7 +69,7 @@ local electronicTechnologyData = {
         },
     },
     {
-        localised_description = { "electronic-locomotives.description", 2.5, 1.15 },
+        localised_description = { "electronic-locomotives.description", "2.5", "1.15" },
         unit = {
             count = 1400,
             time = 60,
@@ -83,7 +83,7 @@ local electronicTechnologyData = {
         },
     },
     {
-        localised_description = { "electronic-locomotives.description", 3.5, 1.75 },
+        localised_description = { "electronic-locomotives.description", "3.5", "1.75" },
         unit = {
             count = 2000,
             time = 60,

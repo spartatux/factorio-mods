@@ -61,10 +61,10 @@ heavyProviderItem.place_result = name
 
 heavyProviderRecipe.name = name
 heavyProviderRecipe.ingredients = {
-    { "electronic-standard-provider", 5 },
-    { "battery",                      50 },
-    { "processing-unit",              10 }
+    { type = "item", name = "electronic-standard-provider", amount = 5 },
+    { type = "item", name = "battery",                      amount = 50 },
+    { type = "item", name = "processing-unit",              amount = 10 }
 }
-heavyProviderRecipe.result = name
+heavyProviderRecipe.results = {{ type = "item", name = name, amount = 1 }}
 
 return { heavyProviderEntity, heavyProviderItem, heavyProviderRecipe }

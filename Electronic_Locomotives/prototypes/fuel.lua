@@ -12,7 +12,7 @@ for i = 1, 5 do
     table.insert(fuel, {
         type = "item",
         name = "electronic-fuel-" .. i,
-        localised_name = { "electronic-locomotives.fuel", i },
+        localised_name = { "electronic-locomotives.fuel", tostring(i) },
         icon = modName .. "/graphics/electric.png",
         icon_size = 22,
         fuel_category = "electronic",

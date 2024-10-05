@@ -13,10 +13,10 @@ function util.standardElectronicIcons(color)
             tint = util.color(color)
         },
         {
-            icon = modName .. "/graphics/electric.png",
-            icon_size = 22,
+            icon = modName .. "/graphics/electric-32.png",
+            icon_size = 32,
             scale = 0.5,
-            shift = { -11, 11 }
+            shift = { -5, -5 }
         }
     }
 end
