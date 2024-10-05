@@ -38,7 +38,7 @@
     },
     {
       "name": "Electronic_Locomotives",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "factoryplanner",
