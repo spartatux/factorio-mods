@@ -2,11 +2,7 @@ script.on_event(defines.events.on_surface_created, function(event)
     local surface = game.surfaces[event.surface_index]
     local planet = game.planets[surface.name]
 
-    game.print(surface.name)
-
     if planet then
-        game.print(planet.name)
-
         local settingsValue = settings.startup["global-network-setting"].value
 
         if settingsValue == "for-free" then

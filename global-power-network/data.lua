@@ -37,7 +37,7 @@ if settingsValue == "planetary-research" then
                 },
                 time = 60
             },
-            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", "space-location-name.nauvis" } }
+            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", { "space-location-name.nauvis" } } }
         },
         {
             type = "technology",
@@ -73,7 +73,7 @@ if settingsValue == "planetary-research" then
                 },
                 time = 60
             },
-            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", "space-location-name.fulgora" } }
+            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", { "space-location-name.fulgora" } } }
         },
         {
             type = "technology",
@@ -109,7 +109,7 @@ if settingsValue == "planetary-research" then
                 },
                 time = 60
             },
-            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", "space-location-name.gleba" } }
+            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", { "space-location-name.gleba" } } }
         },
         {
             type = "technology",
@@ -145,7 +145,7 @@ if settingsValue == "planetary-research" then
                 },
                 time = 60
             },
-            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", "space-location-name.vulcanus" } }
+            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", { "space-location-name.vulcanus" } } }
         },
         {
             type = "technology",
@@ -186,7 +186,7 @@ if settingsValue == "planetary-research" then
                 },
                 time = 60
             },
-            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", "space-location-name.aquilo" } }
+            localised_name = { "global-power-network.global-planetary-network-name", { "", " ", { "space-location-name.aquilo" } } }
         }
     })
 elseif settingsValue == "endgame-research" then
