@@ -50,7 +50,6 @@ script.on_event(defines.events.on_research_finished, function(event)
         end
     elseif settingsValue == "endgame-research" then
         if technology.name == "global-power-network" then
-
             for _, planet in pairs(game.planets) do
                 local surface = planet.surface
 
@@ -65,9 +64,77 @@ script.on_event(defines.events.on_research_finished, function(event)
 end)
 
 script.on_init(function()
-    local surface = game.surfaces["nauvis"]
+    if settings.startup["global-network-setting"].value == "for-free" then
+        for _, planet in pairs(game.planets) do
+            local surface = planet.surface
 
-    if surface and settings.startup["global-network-setting"].value == "for-free" then
-        surface.create_global_electric_network()
+            if surface then
+                if not surface.has_global_electric_network then
+                    surface.create_global_electric_network()
+                end
+            end
+        end
+    end
+end)
+
+script.on_configuration_changed(function(event)
+    if event.mod_startup_settings_changed then
+        local settingsValue = settings.startup["global-network-setting"].value
+
+        if settingsValue == "for-free" then
+            for _, planet in pairs(game.planets) do
+                local surface = planet.surface
+
+                if surface then
+                    if not surface.has_global_electric_network then
+                        surface.create_global_electric_network()
+                    end
+                end
+            end
+        elseif settingsValue == "planetary-research" then
+            local technologies = game.forces.player.technologies
+
+            for _, planet in pairs(game.planets) do
+                if technologies["global-power-network-" .. planet.name] then
+                    local surface = planet.surface
+
+                    if surface then
+                        if technologies["global-power-network-" .. planet.name].researched then
+                            if not surface.has_global_electric_network then
+                                surface.create_global_electric_network()
+                            end
+                        else
+                            if surface.has_global_electric_network then
+                                surface.destroy_global_electric_network()
+                            end
+                        end
+                    end
+                end
+            end
+        elseif settingsValue == "endgame-research" then
+            local globalPowerNetworkTechnology = game.forces.player.technologies["global-power-network"]
+
+            if globalPowerNetworkTechnology and globalPowerNetworkTechnology.researched then
+                for _, planet in pairs(game.planets) do
+                    local surface = planet.surface
+
+                    if surface then
+                        if not surface.has_global_electric_network then
+                            surface.create_global_electric_network()
+                        end
+                    end
+                end
+            else
+                for _, planet in pairs(game.planets) do
+                    local surface = planet.surface
+
+                    if surface then
+                        if surface.has_global_electric_network then
+                            surface.destroy_global_electric_network()
+                        end
+                    end
+                end
+            end
+        end
     end
 end)
