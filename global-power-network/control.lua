@@ -35,8 +35,8 @@ script.on_event(defines.events.on_research_finished, function(event)
 
     if settingsValue == "for-free" then return end
     if settingsValue == "planetary-research" then
-        if string.find(technology.name, "global-power-network-") then
-            local planet = game.planets[string.gsub(technology.name, "global-power-network-", "")]
+        if string.find(technology.name, "global%-power%-network-") then
+            local planet = game.planets[technology.name:gsub("global%-power%-network%-", "")]
 
             if planet then
                 local surface = planet.surface
