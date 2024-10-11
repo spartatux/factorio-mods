@@ -28,9 +28,9 @@ for i = 1, 3 do
     data.raw["produce-per-hour-achievement"]["circuit-veteran-" .. i].localised_description = {
         "",
         {"more-achievements.produce"},
-        "[img=quality/normal]",
-        " ",
         numbers[i],
+        " ",
+        "[img=quality/normal]",
         " ",
         {"item-name.advanced-circuit"},
         {"more-achievements.per-hour"}

@@ -40,9 +40,9 @@ for i = 1, tiers do
                 localised_description = {
                     "",
                     { "more-achievements.craft" },
-                    "[img=quality/" .. qualities[k] .. "]",
-                    " ",
                     number,
+                    " ",
+                    "[img=quality/" .. qualities[k] .. "]",
                     " ",
                     { "item-name." .. module .. "-module-3" },
                     "."

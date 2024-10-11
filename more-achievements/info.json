@@ -7,9 +7,8 @@
     "homepage": "",
     "description": "Extends the base game achievements with more tiers & quality types.",
     "dependencies": [
-        "base >= 1.2.27",
-        "? quality >= 1.2.27",
-        "? space-age >= 1.2.27"
+        "base",
+        "? quality"
     ],
-    "factorio_version": "1.2"
+    "factorio_version": "2.0"
 }

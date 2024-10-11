@@ -55,9 +55,9 @@ for i = 1, #modules do
         data.raw["produce-achievement"]["crafting-with-" .. module .. "-" .. j].localised_description = {
             "",
             { "more-achievements.craft" },
-            "[img=quality/normal]",
-            " ",
             numbers[j],
+            " ",
+            "[img=quality/normal]",
             " ",
             { "item-name." .. module .. "-module-3" },
             "."

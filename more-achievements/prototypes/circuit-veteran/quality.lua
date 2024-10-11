@@ -38,9 +38,9 @@ for i = 1, tiers do
             localised_description = {
                 "",
                 {"more-achievements.produce"},
-                "[img=quality/" .. qualities[j] .. "]",
-                " ",
                 number,
+                " ",
+                "[img=quality/" .. qualities[j] .. "]",
                 " ",
                 {"item-name.advanced-circuit"},
                 {"more-achievements.per-hour"}

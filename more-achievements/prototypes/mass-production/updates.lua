@@ -27,9 +27,9 @@ for i = 1, 3 do
     data.raw["produce-achievement"]["mass-production-" .. i].localised_description = {
         "",
         {"more-achievements.produce"},
-        "[img=quality/normal]",
-        " ",
         numbers[i],
+        " ",
+        "[img=quality/normal]",
         " ",
         {"item-name.electronic-circuit"},
         "."
@@ -55,9 +55,9 @@ for i = 4, 9 do
     data.raw["produce-achievement"]["mass-production-" .. i].localised_description = {
         "",
         {"more-achievements.produce"},
-        "[img=quality/normal]",
-        " ",
         numbers[i],
+        " ",
+        "[img=quality/normal]",
         " ",
         {"item-name.electronic-circuit"},
         "."

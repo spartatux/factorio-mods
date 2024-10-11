@@ -27,9 +27,9 @@ for i = 1, 3 do
     data.raw["produce-per-hour-achievement"]["computer-age-" .. i].localised_description = {
         "",
         {"more-achievements.produce"},
-        "[img=quality/normal]",
-        " ",
         numbers[i],
+        " ",
+        "[img=quality/normal]",
         " ",
         {"item-name.processing-unit"},
         {"more-achievements.per-hour"}
@@ -55,9 +55,9 @@ for i = 4, 9 do
     data.raw["produce-per-hour-achievement"]["computer-age-" .. i].localised_description = {
         "",
         {"more-achievements.produce"},
-        "[img=quality/normal]",
-        " ",
         numbers[i],
+        " ",
+        "[img=quality/normal]",
         " ",
         {"item-name.processing-unit"},
         {"more-achievements.per-hour"}
