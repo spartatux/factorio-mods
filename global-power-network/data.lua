@@ -22,6 +22,8 @@ if settingsValue == "planetary-research" then
             effects = {
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.nauvis" } }
                 }
             },
@@ -57,6 +59,8 @@ if settingsValue == "planetary-research" then
             effects = {
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.fulgora" } }
                 }
             },
@@ -93,6 +97,8 @@ if settingsValue == "planetary-research" then
             effects = {
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.gleba" } }
                 }
             },
@@ -129,6 +135,8 @@ if settingsValue == "planetary-research" then
             effects = {
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.vulcanus" } }
                 }
             },
@@ -199,26 +207,36 @@ elseif settingsValue == "endgame-research" then
             effects = {
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.nauvis" } }
                 },
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.fulgora" } }
                 },
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.gleba" } }
                 },
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.vulcanus" } }
                 },
                 {
                     type = "nothing",
+                    icon = modname .. "/graphics/power.png",
+                    icon_size = 128,
                     effect_description = { "global-power-network.global-planetary-network-effect", { "space-location-name.aquilo" } }
                 }
             },
-            prerequisites = { "interstellar-science-pack" },
+            prerequisites = { "promethium-science-pack" },
             unit = {
                 count = 2000,
                 ingredients =
@@ -232,7 +250,8 @@ elseif settingsValue == "endgame-research" then
                     { "metallurgic-science-pack",     1 },
                     { "agricultural-science-pack",    1 },
                     { "electromagnetic-science-pack", 1 },
-                    { "cryogenic-science-pack",       1 }
+                    { "cryogenic-science-pack",       1 },
+                    { "promethium-science-pack",      1 }
                 },
                 time = 60
             },

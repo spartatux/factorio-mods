@@ -64,13 +64,47 @@ script.on_event(defines.events.on_research_finished, function(event)
 end)
 
 script.on_init(function()
-    if settings.startup["global-network-setting"].value == "for-free" then
+    local settingsValue = settings.startup["global-network-setting"].value
+
+    if settingsValue == "for-free" then
         for _, planet in pairs(game.planets) do
             local surface = planet.surface
 
             if surface then
                 if not surface.has_global_electric_network then
                     surface.create_global_electric_network()
+                end
+            end
+        end
+    elseif settingsValue == "planetary-research" then
+        local technologies = game.forces.player.technologies
+
+        for _, planet in pairs(game.planets) do
+            local technology = technologies["global-power-network-" .. planet.name]
+
+            if technology then
+                local surface = planet.surface
+
+                if surface then
+                    if technology.researched then
+                        if not surface.has_global_electric_network then
+                            surface.create_global_electric_network()
+                        end
+                    end
+                end
+            end
+        end
+    elseif settingsValue == "endgame-research" then
+        local globalPowerNetworkTechnology = game.forces.player.technologies["global-power-network"]
+
+        if globalPowerNetworkTechnology and globalPowerNetworkTechnology.researched then
+            for _, planet in pairs(game.planets) do
+                local surface = planet.surface
+
+                if surface then
+                    if not surface.has_global_electric_network then
+                        surface.create_global_electric_network()
+                    end
                 end
             end
         end

@@ -1,0 +1,6 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.0.1
+Date: 11.10.2024
+  Features:
+    - Global power network
+    - Mod settings to say if its free from start, planetary based or endgame
