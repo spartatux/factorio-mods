@@ -1,9 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.0
-Date: 05.10.2024
+Date: 11.10.2024
   Changes:
-    - Updated to Factorio 1.2
-    - Changed to needing to mine 100 uranium ore
+    - Updated to Factorio 2.0
+    - Changed to needing to mine uranium ore
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.0
 Date: 28.04.2024

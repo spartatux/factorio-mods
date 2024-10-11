@@ -7,8 +7,7 @@ atomicPickaxe.prerequisites = { "steel-axe", "uranium-processing" }
 atomicPickaxe.research_trigger =
 {
     type = "mine-entity",
-    entity = "uranium-ore",
-    count = 100
+    entity = "uranium-ore"
 }
 atomicPickaxe.order = "c-c-b"
 
