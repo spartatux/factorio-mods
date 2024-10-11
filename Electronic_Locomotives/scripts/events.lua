@@ -35,11 +35,11 @@ local function removeFromQuene(unitNumberString)
 end
 
 local function onEntityCreated(eventData)
-    local entity = eventData.created_entity or eventData.entity or eventData.destination
+    local entity = eventData.entity or eventData.destination
     local surface = entity.surface
 
     if not (entity and entity.valid) then return end
-    if not game.planets[surface.name] then return end
+    if not surface.planet then return end
 
     local entityName = entity.name
     local unitNumberString = tostring(entity.unit_number)
@@ -56,7 +56,7 @@ end
 local function onSurfaceCreated(eventData)
     local surface = game.surfaces[eventData.surface_index]
 
-    if game.planets[surface.name] then
+    if surface.planet then
         local surfaceIndexString = tostring(eventData.surface_index)
 
         for _, providerForce in pairs(storage.providers) do
@@ -103,10 +103,11 @@ local function initGlobals()
         storage.providers[forceIndexString] = storage.providers[forceIndexString] or {}
     end
 
-    for _, surface in pairs(game.surfaces) do
-        local surfaceIndexString = tostring(surface.index)
+    for _, planet in pairs(game.planets) do
+        local surface = planet.surface
 
-        if game.planets[surface.name] then
+        if surface then
+            local surfaceIndexString = tostring(surface.index)
             local entities = surface.find_entities_filtered({ name = nameFilter })
 
             for _, providerForce in pairs(storage.providers) do
@@ -121,10 +122,6 @@ local function initGlobals()
                         onEntityCreated({ entity = entity })
                     end
                 end
-            end
-        else
-            if storage.providers[surfaceIndexString] then
-                storage.providers[surfaceIndexString] = nil
             end
         end
     end
@@ -157,13 +154,11 @@ eventsLib.events = {
         storage.fuel[forceIndexString] = getFuel(force)
         storage.providers[forceIndexString] = storage.providers[forceIndexString] or {}
 
-        for _, surface in pairs(game.surfaces) do
-            local surfaceIndexString = tostring(surface.index)
+        for _, planet in pairs(game.planets) do
+            local surface = planet.surface
 
-            if game.planets[surface.name] then
-                for _, providerForce in pairs(storage.providers) do
-                    providerForce[surfaceIndexString] = providerForce[surfaceIndexString] or {}
-                end
+            if surface then
+                storage.providers[forceIndexString][tostring(surface.index)] = {}
             end
         end
     end,
@@ -174,10 +169,14 @@ eventsLib.events = {
 
         storage.fuel[destinationForceIndexString] = getFuel(destinationForce)
 
-        for _, surface in pairs(game.surfaces) do
-            local surfaceIndexString = tostring(surface.index)
+        for _, planet in pairs(game.planets) do
+            local surface = planet.surface
 
-            storage.providers[destinationForceIndexString][surfaceIndexString] = flibTable.deep_merge(storage.providers[sourceForceIndexString][surfaceIndexString], storage.providers[destinationForceIndexString][surfaceIndexString])
+            if surface then
+                local surfaceIndexString = tostring(surface.index)
+
+                storage.providers[destinationForceIndexString][surfaceIndexString] = flibTable.deep_merge(storage.providers[sourceForceIndexString][surfaceIndexString], storage.providers[destinationForceIndexString][surfaceIndexString])
+            end
         end
     end,
 

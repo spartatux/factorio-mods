@@ -50,6 +50,7 @@ heavyProviderEntity.discharge_animation = {
     animation_speed = 0.5
 }
 heavyProviderEntity.fast_replaceable_group = "electronic-provider"
+heavyProviderEntity.localised_description = { "electronic-locomotives.provider-description" }
 heavyProviderEntity.is_electronic = true
 
 heavyProviderItem.name = name

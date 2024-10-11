@@ -12,6 +12,7 @@ standardLocomotiveEntity.icon_mipmaps = nil
 standardLocomotiveEntity.icons = util.standardElectronicIcons(color)
 standardLocomotiveEntity.minable.result = name
 standardLocomotiveEntity.color = util.color(color)
+standardLocomotiveEntity.localised_description = { "", { "entity-description.locomotive" }, "\n", { "electronic-locomotives.locomotive-description" } }
 standardLocomotiveEntity.is_electronic = true
 
 standardLocomotiveItem.name = name
@@ -19,7 +20,7 @@ standardLocomotiveItem.icon = nil
 standardLocomotiveItem.icon_size = nil
 standardLocomotiveItem.icon_mipmaps = nil
 standardLocomotiveItem.icons = util.standardElectronicIcons(color)
-standardLocomotiveItem.order = "a[train-system]-faa[" .. name .. "]"
+standardLocomotiveItem.order = "c[rolling-stock]-ab[" .. name .. "]"
 standardLocomotiveItem.place_result = name
 
 standardLocomotiveRecipe.name = name
@@ -28,6 +29,6 @@ standardLocomotiveRecipe.ingredients = {
     { type = "item", name = "battery",              amount = 10 },
     { type = "item", name = "electric-engine-unit", amount = 20 }
 }
-standardLocomotiveRecipe.results = {{ type = "item", name = name, amount = 1 }}
+standardLocomotiveRecipe.results = { { type = "item", name = name, amount = 1 } }
 
 return { standardLocomotiveEntity, standardLocomotiveItem, standardLocomotiveRecipe }

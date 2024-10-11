@@ -18,6 +18,7 @@ cargoLocomotiveEntity.max_power = "3MW"
 cargoLocomotiveEntity.reversing_power_modifier = 1.2
 cargoLocomotiveEntity.braking_force = 20
 cargoLocomotiveEntity.color = util.color(color)
+cargoLocomotiveEntity.localised_description = { "", { "entity-description.locomotive" }, "\n", { "electronic-locomotives.locomotive-description" } }
 cargoLocomotiveEntity.is_electronic = true
 
 cargoLocomotiveItem.name = name
@@ -25,7 +26,7 @@ cargoLocomotiveItem.icon = nil
 cargoLocomotiveItem.icon_size = nil
 cargoLocomotiveItem.icon_mipmaps = nil
 cargoLocomotiveItem.icons = util.standardElectronicIcons(color)
-cargoLocomotiveItem.order = "a[train-system]-fab[" .. name .. "]"
+cargoLocomotiveItem.order = "c[rolling-stock]-ac[" .. name .. "]"
 cargoLocomotiveItem.place_result = name
 
 cargoLocomotiveRecipe.name = name
@@ -34,6 +35,6 @@ cargoLocomotiveRecipe.ingredients = {
     { type = "item", name = "battery",                        amount = 20 },
     { type = "item", name = "electric-engine-unit",           amount = 20 }
 }
-cargoLocomotiveRecipe.results = {{ type = "item", name = name, amount = 1 }}
+cargoLocomotiveRecipe.results = { { type = "item", name = name, amount = 1 } }
 
 return { cargoLocomotiveEntity, cargoLocomotiveItem, cargoLocomotiveRecipe }

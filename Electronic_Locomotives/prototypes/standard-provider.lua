@@ -51,6 +51,7 @@ standardProviderEntity.discharge_animation = {
 }
 standardProviderEntity.fast_replaceable_group = "electronic-provider"
 standardProviderEntity.next_upgrade = "electronic-heavy-provider"
+standardProviderEntity.localised_description = { "electronic-locomotives.provider-description" }
 standardProviderEntity.is_electronic = true
 
 standardProviderItem.name = name
@@ -66,6 +67,6 @@ standardProviderRecipe.ingredients = {
     { type = "item", name = "battery",            amount = 10 },
     { type = "item", name = "electronic-circuit", amount = 20 }
 }
-standardProviderRecipe.results = {{ type = "item", name = name, amount = 1 }}
+standardProviderRecipe.results = { { type = "item", name = name, amount = 1 } }
 
 return { standardProviderEntity, standardProviderItem, standardProviderRecipe }
