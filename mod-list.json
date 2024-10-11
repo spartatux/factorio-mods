@@ -22,15 +22,24 @@
     },
     {
       "name": "Automatic_Coupling_System",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "ColorblindCircuitNetwork",
       "enabled": true
     },
     {
-      "name": "debugadapter",
+      "name": "colored-space-platform",
       "enabled": false
+    },
+    {
+      "name": "CursorEnhancements",
+      "enabled": true
+    },
+    {
+      "name": "debugadapter",
+      "enabled": true,
+      "version": "1.1.47"
     },
     {
       "name": "EditorExtensions",
@@ -42,7 +51,7 @@
     },
     {
       "name": "factoryplanner",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "flib",
@@ -53,12 +62,32 @@
       "enabled": true
     },
     {
+      "name": "little-splitters",
+      "enabled": false
+    },
+    {
       "name": "more-achievements",
+      "enabled": true
+    },
+    {
+      "name": "RateCalculator",
       "enabled": true
     },
     {
       "name": "research-complete",
       "enabled": true
+    },
+    {
+      "name": "StatsGui",
+      "enabled": true
+    },
+    {
+      "name": "coverage",
+      "enabled": false
+    },
+    {
+      "name": "profiler",
+      "enabled": false
     }
   ]
 }
