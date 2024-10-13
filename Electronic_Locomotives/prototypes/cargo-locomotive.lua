@@ -1,40 +1,41 @@
-local util = require("__Electronic_Locomotives__/prototypes/util")
+local meld = require("__core__/lualib/meld")
+local standardElectronicIcons = require("__Electronic_Locomotives__/prototypes/util")
 local name = "electronic-cargo-locomotive"
 local color = "#a61a1a"
-local cargoLocomotiveEntity = util.copy(data.raw["locomotive"]["locomotive"])
-local cargoLocomotiveItem = util.copy(data.raw["item-with-entity-data"]["locomotive"])
-local cargoLocomotiveRecipe = util.copy(data.raw["recipe"]["locomotive"])
 
-cargoLocomotiveEntity.name = name
-cargoLocomotiveEntity.icon = nil
-cargoLocomotiveEntity.icon_size = nil
-cargoLocomotiveEntity.icon_mipmaps = nil
-cargoLocomotiveEntity.icons = util.standardElectronicIcons(color)
-cargoLocomotiveEntity.minable.result = name
-cargoLocomotiveEntity.max_health = 2000
-cargoLocomotiveEntity.weight = 5000
-cargoLocomotiveEntity.max_speed = 3
-cargoLocomotiveEntity.max_power = "3MW"
-cargoLocomotiveEntity.reversing_power_modifier = 1.2
-cargoLocomotiveEntity.braking_force = 20
-cargoLocomotiveEntity.color = util.color(color)
-cargoLocomotiveEntity.localised_description = { "", { "entity-description.locomotive" }, "\n", { "electronic-locomotives.locomotive-description" } }
-cargoLocomotiveEntity.is_electronic = true
-
-cargoLocomotiveItem.name = name
-cargoLocomotiveItem.icon = nil
-cargoLocomotiveItem.icon_size = nil
-cargoLocomotiveItem.icon_mipmaps = nil
-cargoLocomotiveItem.icons = util.standardElectronicIcons(color)
-cargoLocomotiveItem.order = "c[rolling-stock]-ac[" .. name .. "]"
-cargoLocomotiveItem.place_result = name
-
-cargoLocomotiveRecipe.name = name
-cargoLocomotiveRecipe.ingredients = {
-    { type = "item", name = "electronic-standard-locomotive", amount = 1 },
-    { type = "item", name = "battery",                        amount = 20 },
-    { type = "item", name = "electric-engine-unit",           amount = 20 }
-}
-cargoLocomotiveRecipe.results = { { type = "item", name = name, amount = 1 } }
-
-return { cargoLocomotiveEntity, cargoLocomotiveItem, cargoLocomotiveRecipe }
+data:extend({
+    meld(table.deepcopy(data.raw["locomotive"]["locomotive"]), {
+        name = name,
+        icon = nil,
+        icons = standardElectronicIcons(color),
+        minable = {
+            result = name
+        },
+        max_health = 2000,
+        weight = 5000,
+        max_speed = 3,
+        max_power = "3MW",
+        reversing_power_modifier = 1.2,
+        braking_force = 20,
+        color = util.color(color),
+        localised_description = { "", { "entity-description.locomotive" }, "\n", { "electronic-locomotives.locomotive-description" } },
+        is_electronic = true
+    }),
+    meld(table.deepcopy(data.raw["item-with-entity-data"]["locomotive"]), {
+        name = name,
+        icons = standardElectronicIcons(color),
+        order = "c[rolling-stock]-ac[" .. name .. "]",
+        place_result = name
+    }),
+    meld(table.deepcopy(data.raw["recipe"]["locomotive"]), {
+        name = name,
+        ingredients = meld.overwrite({
+            { type = "item", name = "electronic-standard-locomotive", amount = 1 },
+            { type = "item", name = "battery",                        amount = 20 },
+            { type = "item", name = "electric-engine-unit",           amount = 20 }
+        }),
+        results = {
+            { name = name }
+        }
+    })
+})

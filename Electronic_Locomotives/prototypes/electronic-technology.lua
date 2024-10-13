@@ -1,7 +1,18 @@
+local meld = require("__core__/lualib/meld")
 local modName = "__Electronic_Locomotives__"
-local electronicTechnology = {}
-local electronicTechnologyData = {
-    {
+local electronicTech = {
+    type = "technology",
+    icon = modName .. "/graphics/electronic-railway.png",
+    icon_size = 256,
+    unit = {
+        time = 60
+    },
+    upgrade = true
+}
+
+data:extend({
+    meld(table.deepcopy(electronicTech), {
+        name = "electronic-locomotives",
         effects = {
             {
                 type = "unlock-recipe",
@@ -22,43 +33,46 @@ local electronicTechnologyData = {
                 { "chemical-science-pack",   1 }
             }
         },
-    },
-    {
-        effects = {
+    }),
+    meld(table.deepcopy(electronicTech), {
+        name = "electronic-locomotives-2",
+        effects = meld.overwrite({
             {
                 type = "unlock-recipe",
                 recipe = "electronic-cargo-locomotive"
             }
-        },
+        }),
+        prerequisites = { "electronic-locomotives" },
         unit = {
             count = 800,
-            time = 60,
             ingredients = {
                 { "automation-science-pack", 1 },
                 { "logistic-science-pack",   1 },
                 { "chemical-science-pack",   1 },
                 { "production-science-pack", 1 }
             }
-        },
-    },
-    {
+        }
+    }),
+    meld(table.deepcopy(electronicTech), {
+        name = "electronic-locomotives-3",
         localised_description = { "electronic-locomotives.description", "1.2", "1.05" },
+        prerequisites = { "electronic-locomotives-2" },
         unit = {
             count = 1000,
-            time = 60,
             ingredients = {
                 { "automation-science-pack", 1 },
                 { "logistic-science-pack",   1 },
                 { "chemical-science-pack",   1 },
                 { "production-science-pack", 1 }
             }
-        },
-    },
-    {
+        }
+    }),
+    meld(table.deepcopy(electronicTech), {
+        name = "electronic-locomotives-4",
         localised_description = { "electronic-locomotives.description", "1.8", "1.15" },
+        prerequisites = { "electronic-locomotives-3" },
         unit = {
             count = 1200,
-            time = 60,
             ingredients = {
                 { "automation-science-pack", 1 },
                 { "logistic-science-pack",   1 },
@@ -66,13 +80,14 @@ local electronicTechnologyData = {
                 { "production-science-pack", 1 },
                 { "utility-science-pack",    1 }
             }
-        },
-    },
-    {
+        }
+    }),
+    meld(table.deepcopy(electronicTech), {
+        name = "electronic-locomotives-5",
         localised_description = { "electronic-locomotives.description", "2.5", "1.15" },
+        prerequisites = { "electronic-locomotives-4" },
         unit = {
             count = 1400,
-            time = 60,
             ingredients = {
                 { "automation-science-pack", 1 },
                 { "logistic-science-pack",   1 },
@@ -80,13 +95,14 @@ local electronicTechnologyData = {
                 { "production-science-pack", 1 },
                 { "utility-science-pack",    1 }
             }
-        },
-    },
-    {
+        }
+    }),
+    meld(table.deepcopy(electronicTech), {
+        name = "electronic-locomotives-6",
         localised_description = { "electronic-locomotives.description", "3.5", "1.75" },
+        prerequisites = { "electronic-locomotives-5" },
         unit = {
             count = 2000,
-            time = 60,
             ingredients = {
                 { "automation-science-pack", 1 },
                 { "logistic-science-pack",   1 },
@@ -95,9 +111,11 @@ local electronicTechnologyData = {
                 { "utility-science-pack",    1 },
                 { "space-science-pack",      1 }
             }
-        },
-    },
-    {
+        }
+    }),
+    meld(table.deepcopy(electronicTech), {
+        name = "electronic-locomotives-7",
+        prerequisites = { "electronic-locomotives-6" },
         effects = {
             {
                 type = "unlock-recipe",
@@ -106,7 +124,6 @@ local electronicTechnologyData = {
         },
         unit = {
             count = 10000,
-            time = 60,
             ingredients = {
                 { "automation-science-pack", 1 },
                 { "logistic-science-pack",   1 },
@@ -115,25 +132,6 @@ local electronicTechnologyData = {
                 { "utility-science-pack",    1 },
                 { "space-science-pack",      1 }
             }
-        },
-    },
-}
-
-for i = 1, #electronicTechnologyData do
-    table.insert(electronicTechnology, {
-        type = "technology",
-        name = "electronic-locomotives" .. (i > 1 and "-" .. i or ""),
-        icon = modName .. "/graphics/electronic-railway.png",
-        icon_size = 256,
-        icon_mip_maps = 4,
-        localised_description = electronicTechnologyData[i].localised_description,
-        effects = electronicTechnologyData[i].effects,
-        prerequisites = electronicTechnologyData[i].prerequisites or
-        { ((i > 2 and "electronic-locomotives-" .. i - 1) or "electronic-locomotives") },
-        unit = electronicTechnologyData[i].unit,
-        order = "e-l",
-        upgrade = true
+        }
     })
-end
-
-return electronicTechnology
+})

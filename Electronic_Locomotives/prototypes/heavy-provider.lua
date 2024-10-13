@@ -1,71 +1,73 @@
+local meld = require("__core__/lualib/meld")
 local modName = "__Electronic_Locomotives__"
-local util = require(modName .. "/prototypes/util")
 local name = "electronic-heavy-provider"
-local heavyProviderEntity = util.copy(data.raw["electric-energy-interface"]["electric-energy-interface"])
-local heavyProviderItem = util.copy(data.raw["item"]["accumulator"])
-local heavyProviderRecipe = util.copy(data.raw["recipe"]["accumulator"])
 
-heavyProviderEntity.name = name
-heavyProviderEntity.icon = modName .. "/graphics/" .. name .. "-icon.png"
-heavyProviderEntity.icon_size = 32
-heavyProviderEntity.icon_mipmap = nil
-heavyProviderEntity.icons = nil
-heavyProviderEntity.subgroup = nil
-heavyProviderEntity.minable.result = name
-heavyProviderEntity.enable_gui = false
-heavyProviderEntity.gui_mode = "none"
-heavyProviderEntity.allow_copy_paste = false
-heavyProviderEntity.energy_source = {
-    type = "electric",
-    buffer_capacity = "10GJ",
-    usage_priority = "primary-input",
-    input_flow_limit = "500MW",
-    output_flow_limit = "0MW"
-}
-heavyProviderEntity.energy_production = "0kW"
-heavyProviderEntity.energy_usage = "0kW"
-heavyProviderEntity.picture = {
-    filename = modName .. "/graphics/" .. name .. "-entity.png",
-    priority = "extra-high",
-    width = 124,
-    height = 103,
-    shift = { 0.6875, -0.203125 }
-}
-heavyProviderEntity.charge_animation = {
-    filename = modName .. "/graphics/" .. name .. "-charge.png",
-    width = 138,
-    height = 135,
-    line_length = 8,
-    frame_count = 24,
-    shift = { 0.46875, -0.640625 },
-    animation_speed = 0.5
-}
-heavyProviderEntity.discharge_animation = {
-    filename = modName .. "/graphics/" .. name .. "discharge.png",
-    width = 147,
-    height = 128,
-    line_length = 8,
-    frame_count = 24,
-    shift = { 0.390625, -0.53125 },
-    animation_speed = 0.5
-}
-heavyProviderEntity.fast_replaceable_group = "electronic-provider"
-heavyProviderEntity.localised_description = { "electronic-locomotives.provider-description" }
-heavyProviderEntity.is_electronic = true
-
-heavyProviderItem.name = name
-heavyProviderItem.icon = modName .. "/graphics/" .. name .. "-icon.png"
-heavyProviderItem.icon_size = 32
-heavyProviderItem.icon_mipmap = nil
-heavyProviderItem.order = "e[accumulator]-ab[" .. name .. "]"
-heavyProviderItem.place_result = name
-
-heavyProviderRecipe.name = name
-heavyProviderRecipe.ingredients = {
-    { type = "item", name = "electronic-standard-provider", amount = 5 },
-    { type = "item", name = "battery",                      amount = 50 },
-    { type = "item", name = "processing-unit",              amount = 10 }
-}
-heavyProviderRecipe.results = {{ type = "item", name = name, amount = 1 }}
-
-return { heavyProviderEntity, heavyProviderItem, heavyProviderRecipe }
+data:extend({
+    meld(table.deepcopy(data.raw["electric-energy-interface"]["electric-energy-interface"]), {
+        name = name,
+        icon = modName .. "/graphics/" .. name .. "-icon.png",
+        icon_size = 32,
+        subgroup = nil,
+        minable = {
+            result = name
+        },
+        enable_gui = false,
+        gui_mode = "none",
+        allow_copy_paste = false,
+        energy_source = meld.overwrite({
+            type = "electric",
+            buffer_capacity = "10GJ",
+            usage_priority = "primary-input",
+            input_flow_limit = "500MW",
+            output_flow_limit = "0MW"
+        }),
+        energy_production = "0kW",
+        energy_usage = "0kW",
+        picture = meld.overwrite({
+            filename = modName .. "/graphics/" .. name .. "-entity.png",
+            priority = "extra-high",
+            width = 124,
+            height = 103,
+            shift = { 0.6875, -0.203125 }
+        }),
+        charge_animation = meld.overwrite({
+            filename = modName .. "/graphics/" .. name .. "-charge.png",
+            width = 138,
+            height = 135,
+            line_length = 8,
+            frame_count = 24,
+            shift = { 0.46875, -0.640625 },
+            animation_speed = 0.5
+        }),
+        discharge_animation = meld.overwrite({
+            filename = modName .. "/graphics/" .. name .. "discharge.png",
+            width = 147,
+            height = 128,
+            line_length = 8,
+            frame_count = 24,
+            shift = { 0.390625, -0.53125 },
+            animation_speed = 0.5
+        }),
+        fast_replaceable_group = "electronic-provider",
+        localised_description = { "electronic-locomotives.provider-description" },
+        is_electronic = true
+    }),
+    meld(table.deepcopy(data.raw["item"]["accumulator"]), {
+        name = name,
+        icon = modName .. "/graphics/" .. name .. "-icon.png",
+        icon_size = 32,
+        order = "e[accumulator]-ab[" .. name .. "]",
+        place_result = name
+    }),
+    meld(table.deepcopy(data.raw["recipe"]["accumulator"]), {
+        name = name,
+        ingredients = meld.overwrite({
+            { type = "item", name = "electronic-standard-provider", amount = 5 },
+            { type = "item", name = "battery",                      amount = 50 },
+            { type = "item", name = "processing-unit",              amount = 10 }
+        }),
+        results = {
+            { name = name }
+        }
+    })
+})

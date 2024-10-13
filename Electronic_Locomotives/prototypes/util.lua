@@ -1,7 +1,6 @@
-local util = require("__core__/lualib/util")
 local modName = "__Electronic_Locomotives__"
 
-function util.standardElectronicIcons(color)
+return function(color)
     return {
         {
             icon = modName .. "/graphics/diesel-locomotive-base.png",
@@ -20,5 +19,3 @@ function util.standardElectronicIcons(color)
         }
     }
 end
-
-return util
