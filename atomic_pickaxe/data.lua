@@ -1,14 +1,14 @@
-local atomicPickaxe = table.deepcopy(data.raw.technology["steel-axe"])
+local meld = require("__core__/lualib/meld")
 
-atomicPickaxe.name = "atomic-pickaxe"
-atomicPickaxe.icon = "__atomic_pickaxe__/atomic-pickaxe.png"
-atomicPickaxe.effects = { { type = "character-mining-speed", modifier = 10 } }
-atomicPickaxe.prerequisites = { "steel-axe", "uranium-processing" }
-atomicPickaxe.research_trigger =
-{
-    type = "mine-entity",
-    entity = "uranium-ore"
-}
-atomicPickaxe.order = "c-c-b"
-
-data:extend({ atomicPickaxe })
+data:extend({
+    meld(table.deepcopy(data.raw.technology["steel-axe"]), {
+        name = "atomic-pickaxe",
+        icon = "__atomic_pickaxe__/atomic-pickaxe.png",
+        effects = { { type = "character-mining-speed", modifier = 10 } },
+        prerequisites = { "steel-axe", "uranium-processing" },
+        research_trigger = {
+            type = "mine-entity",
+            entity = "uranium-ore"
+        }
+    })
+})
