@@ -4,8 +4,8 @@ local numbers = { "10k", "1M", "20M", "50M", "100M", "250M", "500M", "1G", "20G"
 
 for i = 1, 3 do
     meld(data.raw["produce-achievement"]["mass-production-" .. i], {
-        icon = nil,
-        icon_size = nil,
+        icon = meld.delete(),
+        icon_size = meld.delete(),
         icons = meld.overwrite({
             {
                 icon = base .. "/graphics/achievement/mass-production-" .. i .. ".png",

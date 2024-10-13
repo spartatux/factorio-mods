@@ -6,7 +6,7 @@ local color = "#a61a1a"
 data:extend({
     meld(table.deepcopy(data.raw["locomotive"]["locomotive"]), {
         name = name,
-        icon = nil,
+        icon = meld.delete(),
         icons = standardElectronicIcons(color),
         minable = {
             result = name

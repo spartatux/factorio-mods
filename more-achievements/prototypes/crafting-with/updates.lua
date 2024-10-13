@@ -8,8 +8,8 @@ for i = 1, #modules do
     local module = modules[i]
 
     meld(data.raw["produce-achievement"]["crafting-with-" .. module], {
-        icon = nil,
-        icon_size = nil,
+        icon = meld.delete(),
+        icon_size = meld.delete(),
         icons = meld.overwrite({
             {
                 icon = base .. "/graphics/achievement/crafting-with-" .. module .. ".png",

@@ -7,7 +7,7 @@ data:extend({
         name = name,
         icon = modName .. "/graphics/" .. name .. "-icon.png",
         icon_size = 32,
-        subgroup = nil,
+        subgroup = meld.delete(),
         minable = {
             result = name
         },
