@@ -8,7 +8,9 @@
     "description": "Removes the need for power poles. With different mod settings.",
     "dependencies": [
         "base",
-        "space-age"
+        "space-age",
+        "? quality"
     ],
-    "factorio_version": "2.0"
+    "factorio_version": "2.0",
+    "space_travel_required": true
 }
