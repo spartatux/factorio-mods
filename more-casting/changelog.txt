@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.3
+Date: 18.10.2024
+  Changes:
+    - Adjusted shift & scale logic a bit
+  Features:
+    - Added missing equipment name localised naming
+---------------------------------------------------------------------------------------------------
 Version: 0.0.2
 Date: 18.10.2024
   Features:
@@ -7,4 +14,4 @@ Date: 18.10.2024
 Version: 0.0.1
 Date: 18.10.2024
   Features:
-    - Adds casting recipes for recipes that have ingredients that can be casted in space-age
+    - Adds casting recipes for recipes that have ingredients that can be casted in space age

@@ -21,15 +21,15 @@ local function makeCastingIcons(otherIcon)
         {
             icon = otherIcon,
             icon_size = 64,
-            scale = 0.40625,
-            shift = { 0, 10 },
+            scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
+            shift = { 0, 20 / 2 },
             draw_background = true
         },
         {
             icon = modName .. "/graphics/molten-tungsten.png",
             icon_size = 64,
-            scale = 0.40625,
-            shift = { 9.5, -0.6 },
+            scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
+            shift = { 19 / 2, -2 / 2 },
             draw_background = true
         }
     }
@@ -86,7 +86,7 @@ local function createRecipe(item)
                 meld(table.deepcopy(recipe), {
                     name = "casting-tungsten-" .. item.name,
                     icons = item.icon and makeCastingIcons(item.icon) or nil,
-                    localised_name = { "molten-tungsten.casting", { "?", { "entity-name." .. item.name }, { "item-name." .. item.name }, {"equipment-name." .. item.name} } },
+                    localised_name = { "molten-tungsten.casting", { "?", { "entity-name." .. item.name }, { "item-name." .. item.name }, { "equipment-name." .. item.name } } },
                     category = "metallurgy",
                     subgroup = "casting-" .. item.subgroup,
                     ingredients = meld.overwrite(ingredients),
