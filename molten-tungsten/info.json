@@ -1,0 +1,16 @@
+{
+    "name": "molten-tungsten",
+    "version": "0.0.1",
+    "title": "Molten Tungsten",
+    "author": "LuziferSenpai",
+    "contact": "",
+    "homepage": "",
+    "description": "Adds a molten tungsten recipe & adds alternative recipes for every recipe with tungsten plate in it.",
+    "dependencies": [
+        "base",
+        "space-age",
+        "? more-casting"
+    ],
+    "space_travel_required": true,
+    "factorio_version": "2.0"
+}

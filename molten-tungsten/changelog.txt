@@ -1,0 +1,6 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.0.1
+Date: 18.10.2024
+  Features:
+    - Adds molten tungsten
+    - Adds casting recipes for recipes that have ingredients that contain tungsten steel
