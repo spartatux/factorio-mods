@@ -42,37 +42,26 @@ local itemRaws = {
     "tool"
 }
 
---0.8125 scale down from 64
-local function makeCastingIcons(item, iconType)
-    local icons = {}
+-- 0.8125 for a single molten fluid = 52px at shift 19/-2
+-- 0.65625 for a double molten fluid, top fluid = 42px at shift 27/-1
+-- 0.59375 for a double molten fluid, lower fluid = 38px at shift 10/-1
+-- base graphic is also scaled to 52px and shifted to 0/20
+local function makeCastingIcons(item, fluids)
+    local icons = {
+        {
+            icon = modName .. "/graphics/64x64-empty.png"
+        }
+    }
 
     if item.icons == nil then
-        icons = {
-            {
-                icon = modName .. "/graphics/64x64-empty.png"
-            },
-            {
-                icon = item.icon,
-                icon_size = item.icon_size,
-                scale = (0.5 * defaultIconSizeDefine / (item.icon_size or defaultIconSizeDefine)) * 0.8125,
-                shift = { 0, 20 / 2 },
-                draw_background = true
-            },
-            {
-                icon = spaceAge .. "/graphics/icons/fluid/molten-" .. iconType .. ".png",
-                icon_size = 64,
-                scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
-                shift = { 19 / 2, -2 / 2 },
-                draw_background = true
-            }
+        icons[#icons + 1] = {
+            icon = item.icon,
+            icon_size = item.icon_size,
+            scale = (0.5 * defaultIconSizeDefine / (item.icon_size or defaultIconSizeDefine)) * 0.8125,
+            shift = { 0, 20 / 2 },
+            draw_background = true
         }
     else
-        icons = {
-            {
-                icon = modName .. "/graphics/64x64-empty.png"
-            }
-        }
-
         for i = 1, #item.icons do
             local icon = table.deepcopy(item.icons[i])
 
@@ -87,9 +76,37 @@ local function makeCastingIcons(item, iconType)
 
             icons[#icons + 1] = icon
         end
+    end
+
+    if fluids.moltenIronAmount > 0 and fluids.moltenCopperAmount > 0 then
+        local first = fluids.moltenIronAmount >= fluids.moltenCopperAmount
 
         icons[#icons + 1] = {
-            icon = spaceAge .. "/graphics/icons/fluid/molten-" .. iconType .. ".png",
+            icon = spaceAge .. "/graphics/icons/fluid/molten-" .. (first and "copper" or "iron") .. ".png",
+            icon_size = 64,
+            scale = (0.5 * defines.default_icon_size / 64) * 0.59375,
+            shift = { 10 / 2, -1 / 2 },
+            draw_background = true
+        }
+
+        icons[#icons + 1] = {
+            icon = spaceAge .. "/graphics/icons/fluid/molten-" .. (first and "iron" or "copper") .. ".png",
+            icon_size = 64,
+            scale = (0.5 * defines.default_icon_size / 64) * 0.65625,
+            shift = { 27 / 2, -1 / 2 },
+            draw_background = true
+        }
+    elseif fluids.moltenIronAmount > 0 then
+        icons[#icons + 1] = {
+            icon = spaceAge .. "/graphics/icons/fluid/molten-iron.png",
+            icon_size = 64,
+            scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
+            shift = { 19 / 2, -2 / 2 },
+            draw_background = true
+        }
+    else
+        icons[#icons + 1] = {
+            icon = spaceAge .. "/graphics/icons/fluid/molten-copper.png",
             icon_size = 64,
             scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
             shift = { 19 / 2, -2 / 2 },
@@ -160,7 +177,7 @@ local function createRecipe(item)
                 data:extend({
                     meld(table.deepcopy(recipe), {
                         name = "casting-" .. item.name,
-                        icons = makeCastingIcons(item, moltenIronAmount >= moltenCopperAmount and "iron" or "copper"),
+                        icons = makeCastingIcons(item, { moltenIronAmount = moltenIronAmount, moltenCopperAmount = moltenCopperAmount }),
                         localised_name = { "more-casting.casting", { "?", { "entity-name." .. item.name }, { "item-name." .. item.name }, { "equipment-name." .. item.name } } },
                         category = "metallurgy",
                         subgroup = "casting-" .. item.subgroup,

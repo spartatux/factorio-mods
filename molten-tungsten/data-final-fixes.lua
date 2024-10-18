@@ -17,36 +17,26 @@ local itemRaws = {
     "tool"
 }
 
-local function makeCastingIcons(item)
-    local icons = {}
+-- 0.8125 for a single molten fluid = 52px at shift 19/-2
+-- 0.65625 for a double molten fluid, top fluid = 42px at shift 27/-1
+-- 0.59375 for a double molten fluid, lower fluid = 38px at shift 10/-1
+-- base graphic is also scaled to 52px and shifted to 0/20
+local function makeCastingIcons(item, tungstenAmount, otherFluid)
+    local icons = {
+        {
+            icon = modName .. "/graphics/64x64-empty.png"
+        }
+    }
 
     if item.icons == nil then
-        icons = {
-            {
-                icon = modName .. "/graphics/64x64-empty.png"
-            },
-            {
-                icon = item.icon,
-                icon_size = item.icon_size,
-                scale = (0.5 * defaultIconSizeDefine / (item.icon_size or defaultIconSizeDefine)) * 0.8125,
-                shift = { 0, 20 / 2 },
-                draw_background = true
-            },
-            {
-                icon = modName .. "/graphics/molten-tungsten.png",
-                icon_size = 64,
-                scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
-                shift = { 19 / 2, -2 / 2 },
-                draw_background = true
-            }
+        icons[#icons + 1] = {
+            icon = item.icon,
+            icon_size = item.icon_size,
+            scale = (0.5 * defaultIconSizeDefine / (item.icon_size or defaultIconSizeDefine)) * 0.8125,
+            shift = { 0, 20 / 2 },
+            draw_background = true
         }
     else
-        icons = {
-            {
-                icon = modName .. "/graphics/64x64-empty.png"
-            }
-        }
-
         for i = 1, #item.icons do
             local icon = table.deepcopy(item.icons[i])
 
@@ -61,7 +51,34 @@ local function makeCastingIcons(item)
 
             icons[#icons + 1] = icon
         end
+    end
 
+    if otherFluid and otherFluid.amount > 0 then
+        log(serpent.block(otherFluid))
+
+        local first = tungstenAmount >= otherFluid.amount
+        local graphics = {
+            copper = spaceAge .. "/graphics/icons/fluid/molten-copper.png",
+            iron = spaceAge .. "/graphics/icons/fluid/molten-iron.png",
+            tungsten = modName .. "/graphics/molten-tungsten.png",
+        }
+
+        icons[#icons + 1] = {
+            icon = graphics[first and otherFluid.name or "tungsten"],
+            icon_size = 64,
+            scale = (0.5 * defines.default_icon_size / 64) * 0.59375,
+            shift = { 10 / 2, -1 / 2 },
+            draw_background = true
+        }
+
+        icons[#icons + 1] = {
+            icon = graphics[first and "tungsten" or otherFluid.name],
+            icon_size = 64,
+            scale = (0.5 * defines.default_icon_size / 64) * 0.65625,
+            shift = { 27 / 2, -1 / 2 },
+            draw_background = true
+        }
+    else
         icons[#icons + 1] = {
             icon = modName .. "/graphics/molten-tungsten.png",
             icon_size = 64,
@@ -76,6 +93,7 @@ end
 
 local function ingredientsMagic(ingredients)
     local moltenTungstenAmount = 0
+    local otherFluid = { name = "", amount = 0 }
     local differentFluidAmount = 0
     local toRemove = {}
 
@@ -88,6 +106,14 @@ local function ingredientsMagic(ingredients)
                     toRemove[tostring(index)] = true
                 end
             elseif ingredient.type == "fluid" then
+                if ingredient.name == "molten-iron" then
+                    otherFluid = { name = "iron", amount = ingredient.amount }
+                end
+
+                if ingredient.name == "molten-copper" then
+                    otherFluid = { name = "copper", amount = ingredient.amount }
+                end
+
                 differentFluidAmount = differentFluidAmount + 1
             end
         end
@@ -107,7 +133,7 @@ local function ingredientsMagic(ingredients)
         end
     end
 
-    return moltenTungstenAmount, ingredients
+    return moltenTungstenAmount, otherFluid, ingredients
 end
 
 local function createRecipe(item)
@@ -118,13 +144,13 @@ local function createRecipe(item)
             recipe = recipes["casting-" .. item.name]
         end
 
-        local moltenTungstenAmount, ingredients = ingredientsMagic(table.deepcopy(recipe.ingredients))
+        local moltenTungstenAmount, otherFluid, ingredients = ingredientsMagic(table.deepcopy(recipe.ingredients))
 
         if moltenTungstenAmount > 0 then
             data:extend({
                 meld(table.deepcopy(recipe), {
                     name = "casting-tungsten-" .. item.name,
-                    icons = makeCastingIcons(item),
+                    icons = makeCastingIcons(item, moltenTungstenAmount, otherFluid),
                     localised_name = { "molten-tungsten.casting", { "?", { "entity-name." .. item.name }, { "item-name." .. item.name }, { "equipment-name." .. item.name } } },
                     category = "metallurgy",
                     subgroup = "casting-" .. item.subgroup,
