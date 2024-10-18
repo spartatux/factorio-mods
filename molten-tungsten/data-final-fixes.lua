@@ -3,6 +3,7 @@ local spaceAge = "__space-age__"
 local meld = require("__core__/lualib/meld")
 local recipes = data.raw.recipe
 local tungstenSteelTechnology = data.raw.technology["tungsten-steel"]
+local defaultIconSizeDefine = defines.default_icon_size
 local moreCastingActive = mods["more-casting"]
 local itemRaws = {
     "item",
@@ -16,23 +17,61 @@ local itemRaws = {
     "tool"
 }
 
-local function makeCastingIcons(otherIcon)
-    return {
-        {
-            icon = otherIcon,
-            icon_size = 64,
-            scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
-            shift = { 0, 20 / 2 },
-            draw_background = true
-        },
-        {
+local function makeCastingIcons(item)
+    local icons = {}
+
+    if item.icons == nil then
+        icons = {
+            {
+                icon = modName .. "/graphics/64x64-empty.png"
+            },
+            {
+                icon = item.icon,
+                icon_size = item.icon_size,
+                scale = (0.5 * defaultIconSizeDefine / (item.icon_size or defaultIconSizeDefine)) * 0.8125,
+                shift = { 0, 20 / 2 },
+                draw_background = true
+            },
+            {
+                icon = modName .. "/graphics/molten-tungsten.png",
+                icon_size = 64,
+                scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
+                shift = { 19 / 2, -2 / 2 },
+                draw_background = true
+            }
+        }
+    else
+        icons = {
+            {
+                icon = modName .. "/graphics/64x64-empty.png"
+            }
+        }
+
+        for i = 1, #item.icons do
+            local icon = table.deepcopy(item.icons[i])
+
+            icon.scale = ((icon.scale == nil) and (0.5 * defaultIconSizeDefine / (icon.icon_size or defaultIconSizeDefine)) or icon.scale) * 0.8125
+            icon.shift = util.mul_shift(icon.shift, 0.8125)
+
+            if icon.shift then
+                icon.shift = { icon.shift[1], icon.shift[2] + (20 / 2) }
+            else
+                icon.shift = { 0, 20 / 2 }
+            end
+
+            icons[#icons + 1] = icon
+        end
+
+        icons[#icons + 1] = {
             icon = modName .. "/graphics/molten-tungsten.png",
             icon_size = 64,
             scale = (0.5 * defines.default_icon_size / 64) * 0.8125,
             shift = { 19 / 2, -2 / 2 },
             draw_background = true
         }
-    }
+    end
+
+    return icons
 end
 
 local function ingredientsMagic(ingredients)
@@ -85,7 +124,7 @@ local function createRecipe(item)
             data:extend({
                 meld(table.deepcopy(recipe), {
                     name = "casting-tungsten-" .. item.name,
-                    icons = item.icon and makeCastingIcons(item.icon) or nil,
+                    icons = makeCastingIcons(item),
                     localised_name = { "molten-tungsten.casting", { "?", { "entity-name." .. item.name }, { "item-name." .. item.name }, { "equipment-name." .. item.name } } },
                     category = "metallurgy",
                     subgroup = "casting-" .. item.subgroup,
