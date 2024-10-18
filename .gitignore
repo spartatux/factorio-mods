@@ -12,6 +12,8 @@
 !global-power-network/**
 !more-achievements
 !more-achievements/**
+!more-casting
+!more-casting/**
 !research-complete
 !research-complete/**
 !mod-list.json

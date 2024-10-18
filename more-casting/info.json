@@ -1,0 +1,15 @@
+{
+    "name": "more-casting",
+    "version": "0.0.1",
+    "title": "More Casting",
+    "author": "LuziferSenpai",
+    "contact": "",
+    "homepage": "",
+    "description": "Adds casting recipes for recipes that have ingredients that can be casted in space-age.",
+    "dependencies": [
+        "base",
+        "space-age"
+    ],
+    "space_travel_required": true,
+    "factorio_version": "2.0"
+}
