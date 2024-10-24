@@ -17,14 +17,6 @@
       "enabled": true
     },
     {
-      "name": "aai-containers",
-      "enabled": true
-    },
-    {
-      "name": "aai-loaders",
-      "enabled": true
-    },
-    {
       "name": "atomic_pickaxe",
       "enabled": true
     },
@@ -65,22 +57,6 @@
       "enabled": true
     },
     {
-      "name": "infinite-quality-tiers",
-      "enabled": false
-    },
-    {
-      "name": "lane-balancers",
-      "enabled": true
-    },
-    {
-      "name": "mining-patch-planner",
-      "enabled": false
-    },
-    {
-      "name": "ModuleInserterSimplified",
-      "enabled": true
-    },
-    {
       "name": "molten-tungsten",
       "enabled": true
     },
@@ -98,10 +74,6 @@
     },
     {
       "name": "research-complete",
-      "enabled": true
-    },
-    {
-      "name": "simple-area-screenshots",
       "enabled": true
     },
     {

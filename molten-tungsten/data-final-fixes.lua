@@ -177,26 +177,6 @@ for _, subGroup in pairs(table.deepcopy(data.raw["item-subgroup"])) do
     })
 end
 
-data:extend({
-    meld(table.deepcopy(data.raw.fluid["molten-iron"]), {
-        name = "molten-tungsten",
-        icon = modName .. "/graphics/molten-tungsten.png",
-        order = "b[new-fluid]-b[vulcanus]-c[molten-tungsten]",
-        base_color = { 70, 58, 72 },
-        flow_color = { 222, 214, 231 },
-    }),
-    meld(table.deepcopy(recipes["tungsten-plate"]), {
-        name = "molten-tungsten",
-        order = "c[tungsten]-d[molten-tungsten]",
-        results = { { type = "fluid", name = "molten-tungsten", amount = 10 } },
-    })
-})
-
-table.insert(tungstenSteelTechnology.effects, {
-    type = "unlock-recipe",
-    recipe = "molten-tungsten"
-})
-
 for _, itemRaw in pairs(itemRaws) do
     for _, item in pairs(data.raw[itemRaw]) do
         createRecipe(item)

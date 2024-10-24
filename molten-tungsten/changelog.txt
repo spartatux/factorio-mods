@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.4
+Date: 24.10.2024
+  Changes:
+    - Moved molten tungsten & tungsten-plate from molten tungsten to data.lua for better interaction with other mods
+---------------------------------------------------------------------------------------------------
 Version: 0.0.3
 Date: 18.10.2024
   Changes:
