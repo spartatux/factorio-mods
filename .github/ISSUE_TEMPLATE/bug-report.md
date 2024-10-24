@@ -29,6 +29,13 @@ If applicable, add screenshots to help explain your problem.
 
 **Factorio Error Report**
 If Factorio provided an error message, please include it here. This helps identify and troubleshoot issues more efficiently.
+Pls put the report into 3x\`.
+\
+\`\`\`
+\
+Error Report
+\
+\`\`\`
 
 **Additional context**
 Add any other context about the problem here.
