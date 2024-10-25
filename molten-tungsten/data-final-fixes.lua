@@ -172,7 +172,7 @@ for _, subGroup in pairs(table.deepcopy(data.raw["item-subgroup"])) do
     data:extend({
         meld(table.deepcopy(subGroup), {
             name = meld.invoke(function(oldName) return "casting-" .. oldName end),
-            order = meld.invoke(function(oldOrder) return oldOrder .. "a" end)
+            order = meld.invoke(function(oldOrder) return (oldOrder or "") .. "a" end)
         })
     })
 end
