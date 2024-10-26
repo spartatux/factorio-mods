@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.6
+Date: 27.10.2024
+  Changes:
+    - Recipes now uses -10% per ingredient found to be replaced. This is done to try to make it actually worth it.
+---------------------------------------------------------------------------------------------------
 Version: 0.0.5
 Date: 25.10.2024
   Changes:

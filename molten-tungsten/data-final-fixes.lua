@@ -92,6 +92,7 @@ local function makeCastingIcons(item, tungstenAmount, otherFluid)
 end
 
 local function ingredientsMagic(ingredients)
+    local moltenTungstenIngredients = 0
     local moltenTungstenAmount = 0
     local otherFluid = { name = "", amount = 0 }
     local differentFluidAmount = 0
@@ -101,6 +102,7 @@ local function ingredientsMagic(ingredients)
         for index, ingredient in pairs(ingredients) do
             if ingredient.type == "item" then
                 if ingredient.name == "tungsten-plate" then
+                    moltenTungstenIngredients = moltenTungstenIngredients + 1
                     moltenTungstenAmount = moltenTungstenAmount + (10 * ingredient.amount)
 
                     toRemove[tostring(index)] = true
@@ -128,7 +130,7 @@ local function ingredientsMagic(ingredients)
             end
 
             if moltenTungstenAmount > 0 then
-                table.insert(ingredients, { type = "fluid", name = "molten-tungsten", amount = moltenTungstenAmount, fluidbox_multiplier = 10 })
+                table.insert(ingredients, { type = "fluid", name = "molten-tungsten", amount = moltenTungstenAmount * (1 - (moltenTungstenIngredients / 10)), fluidbox_multiplier = 10 })
             end
         end
     end

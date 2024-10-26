@@ -19,15 +19,15 @@ local banList = {
 }
 local castingIngredients = {
     moltenIron = {
-        ["iron-plate"] = 10,
-        ["steel-plate"] = 30,
-        ["iron-gear-wheel"] = 10,
-        ["iron-stick"] = 5,
-        ["pipe"] = 10
+        ["iron-plate"] = 10,      --10, 5
+        ["steel-plate"] = 30,     --30, 20
+        ["iron-gear-wheel"] = 30, --10, 5
+        ["iron-stick"] = 5,       --5, 2.5
+        ["pipe"] = 10             --10, 5
     },
     moltenCopper = {
-        ["copper-plate"] = 10,
-        ["copper-cable"] = 2.5
+        ["copper-plate"] = 10, --10, 5
+        ["copper-cable"] = 2.5 --2.5, 1.25
     }
 }
 local itemRaws = {
@@ -118,6 +118,8 @@ local function makeCastingIcons(item, fluids)
 end
 
 local function ingredientsMagic(ingredients)
+    local moltenIronIngredients = 0
+    local moltenCopperIngredients = 0
     local moltenIronAmount = 0
     local moltenCopperAmount = 0
     local hasFluid = false
@@ -130,10 +132,12 @@ local function ingredientsMagic(ingredients)
                 local moltenCopperAmountC = castingIngredients.moltenCopper[ingredient.name]
 
                 if moltenIronAmountC then
+                    moltenIronIngredients = moltenIronIngredients + 1
                     moltenIronAmount = moltenIronAmount + (moltenIronAmountC * ingredient.amount)
 
                     toRemove[tostring(index)] = true
                 elseif moltenCopperAmountC then
+                    moltenCopperIngredients = moltenCopperIngredients + 1
                     moltenCopperAmount = moltenCopperAmount + (moltenCopperAmountC * ingredient.amount)
 
                     toRemove[tostring(index)] = true
@@ -154,11 +158,11 @@ local function ingredientsMagic(ingredients)
             end
 
             if moltenIronAmount > 0 then
-                table.insert(ingredients, { type = "fluid", name = "molten-iron", amount = moltenIronAmount, fluidbox_multiplier = 10 })
+                table.insert(ingredients, { type = "fluid", name = "molten-iron", amount = moltenIronAmount * (1 - (moltenIronIngredients / 10)), fluidbox_multiplier = 10 })
             end
 
             if moltenCopperAmount > 0 then
-                table.insert(ingredients, { type = "fluid", name = "molten-copper", amount = moltenCopperAmount, fluidbox_multiplier = 10 })
+                table.insert(ingredients, { type = "fluid", name = "molten-copper", amount = moltenCopperAmount * (1 - (moltenCopperIngredients / 10)), fluidbox_multiplier = 10 })
             end
         end
     end
