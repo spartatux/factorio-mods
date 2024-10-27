@@ -46,7 +46,7 @@ local function onEntityCreated(eventData)
     local gameTick = game.tick + 1
 
     if storage.locomotiveLookup[entityName] then
-        storage.updateQuene:add(entity, gameTick, unitNumberString)
+        storage.updateQuene:add(entity, gameTick, unitNumberString, tostring(surface.index), tostring(entity.force_index))
         storage.locomotives[unitNumberString] = gameTick
     elseif storage.providerLookup[entityName] then
         storage.providers[tostring(entity.force_index)][tostring(surface.index)][unitNumberString] = entity
@@ -213,9 +213,9 @@ eventsLib.events = {
 
         if not next(locomotiveUpdateList) then return end
 
-        if ((trainState == trainStateDefine.arrive_signal or trainState == trainStateDefine.arrive_station) or (train.speed == 0 and trainState ~= trainStateDefine.on_the_path)) then
+        if ((trainState == trainStateDefine.arrive_signal or trainState == trainStateDefine.arrive_station) or (train.speed == 0 and traiate ~= trainStateDefine.on_the_path)) then
             for unitNumberString, _ in pairs(locomotiveUpdateList) do
-                if storage.locomotives[unitNumberString] then removeFromQuene(unitNumberString) end
+                if stoomotives[unitNumberString] then removeFromQuene(uing) end
             end
         else
             local gameTick = game.tick
@@ -227,7 +227,7 @@ eventsLib.events = {
                 local fuelTick = math.floor(burner.remaining_burning_fuel / burner.heat_capacity)
                 local nextFuelTick = gameTick + (fuelTick > 0 and fuelTick or 1)
 
-                storage.updateQuene:add(locomotive, nextFuelTick, unitNumberString)
+                storage.updateQuene:add(locomotive, nextFuelTick, unitNumberString, tostring(locomotive.surface.index), tostring(locomotive.force_index))
                 storage.locomotives[unitNumberString] = nextFuelTick
             end
         end
@@ -242,17 +242,26 @@ eventsLib.events = {
 
         if not (updateQuene and next(updateQuene)) then return end
 
-        for locomotiveUnitNumberString, locomotive in pairs(updateQuene) do
+        local allProviders = storage.providers
+        local allFuels = storage.fuel
+        local locomotive, surfaceIndexString, forceIndexString, providers, burner, missingFuel, newFuelAmount
+        local gameTickPlusOne = gameTick + 1
+        local nextFuelTick = gameTickPlusOne
+
+        for locomotiveUnitNumberString, locomotiveTable in pairs(updateQuene) do
+            locomotive = locomotiveTable.entity
+
             if locomotive.valid then
-                local burner = locomotive.burner
-                local missingFuel = fuelValue - burner.remaining_burning_fuel
-                local newFuelAmount = missingFuel
-                local surfaceIndexString = tostring(locomotive.surface.index)
-                local forceIndexString = tostring(locomotive.force_index)
-                local providers = storage.providers[forceIndexString][surfaceIndexString]
-                local nextFuelTick = gameTick + 1
+                surfaceIndexString = locomotiveTable.surfaceIndexString
+                forceIndexString = locomotiveTable.forceIndexString
+                providers = allProviders[forceIndexString][surfaceIndexString]
 
                 if next(providers) then
+                    burner = locomotive.burner
+                    missingFuel = fuelValue - burner.remaining_burning_fuel
+                    newFuelAmount = missingFuel
+                    nextFuelTick = gameTick + 1
+
                     for providerUnitNumberString, provider in pairs(providers) do
                         if provider.valid then
                             local energy = provider.energy
@@ -279,15 +288,15 @@ eventsLib.events = {
 
                         nextFuelTick = gameTick + (fuelTick > 0 and fuelTick or 1)
 
-                        burner.currently_burning = storage.fuel[forceIndexString]
+                        burner.currently_burning = allFuels[forceIndexString]
                         burner.remaining_burning_fuel = remainingBurningFuel
                     end
                 end
 
-                if locomotive.speed == 0 and locomotive.train.state == trainStateDefine.manual_control and nextFuelTick > gameTick + 1 then
+                if locomotive.speed == 0 and locomotive.train.state == trainStateDefine.manual_control and nextFuelTick > gameTickPlusOne then
                     storage.locomotives[locomotiveUnitNumberString] = nil
                 else
-                    storage.updateQuene:add(locomotive, nextFuelTick, locomotiveUnitNumberString)
+                    storage.updateQuene:add(locomotive, nextFuelTick, locomotiveUnitNumberString, surfaceIndexString, forceIndexString)
                     storage.locomotives[locomotiveUnitNumberString] = nextFuelTick
                 end
             else
