@@ -213,9 +213,9 @@ eventsLib.events = {
 
         if not next(locomotiveUpdateList) then return end
 
-        if ((trainState == trainStateDefine.arrive_signal or trainState == trainStateDefine.arrive_station) or (train.speed == 0 and traiate ~= trainStateDefine.on_the_path)) then
+        if ((trainState == trainStateDefine.arrive_signal or trainState == trainStateDefine.arrive_station) or (train.speed == 0 and trainState ~= trainStateDefine.on_the_path)) then
             for unitNumberString, _ in pairs(locomotiveUpdateList) do
-                if stoomotives[unitNumberString] then removeFromQuene(uing) end
+                if storage.locomotives[unitNumberString] then removeFromQuene(unitNumberString) end
             end
         else
             local gameTick = game.tick
@@ -353,6 +353,50 @@ eventsLib.on_configuration_changed = function(eventData)
             end
 
             storage.script_data = nil
+        end,
+        ["3.1.0"] = function()
+            if next(storage.updateQuene) then
+                local newQuene = {}
+
+                for gameTick, locomotives in pairs(storage.updateQuene) do
+                    for unitNumberString, locomotiveData in pairs(locomotives) do
+                        if locomotiveData.valid then
+                            newQuene[unitNumberString] = { entity = locomotiveData, gameTick = gameTick }
+
+                            removeFromQuene(unitNumberString)
+                        end
+                    end
+                end
+
+                for unitNumberString, locomotiveData in pairs(newQuene) do
+                    local entity = locomotiveData.entity
+
+                    storage.updateQuene:add(entity, locomotiveData.gameTick, unitNumberString, tostring(entity.surface.index), tostring(entity.force_index))
+                    storage.locomotives[unitNumberString] = locomotiveData.gameTick
+                end
+            end
+        end,
+        ["3.1.1"] = function()
+            if next(storage.updateQuene) then
+                local newQuene = {}
+
+                for gameTick, locomotives in pairs(storage.updateQuene) do
+                    for unitNumberString, locomotiveData in pairs(locomotives) do
+                        if locomotiveData.valid then
+                            newQuene[unitNumberString] = { entity = locomotiveData, gameTick = gameTick }
+
+                            removeFromQuene(unitNumberString)
+                        end
+                    end
+                end
+
+                for unitNumberString, locomotiveData in pairs(newQuene) do
+                    local entity = locomotiveData.entity
+
+                    storage.updateQuene:add(entity, locomotiveData.gameTick, unitNumberString, tostring(entity.surface.index), tostring(entity.force_index))
+                    storage.locomotives[unitNumberString] = locomotiveData.gameTick
+                end
+            end
         end
     }
 
