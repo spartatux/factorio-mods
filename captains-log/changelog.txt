@@ -1,0 +1,7 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.0.1
+Date: 31.10.2024
+  Features:
+    - Tracking of space platforms
+    - Tracks the journey, loading time & journey time
+    - Force support
