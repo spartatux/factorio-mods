@@ -13,7 +13,7 @@ local function initPlayer(player)
             guis = {}
         }
 
-        if #storage.platforms[forceIndexString] > 0 then
+        if #storage.platformsList[forceIndexString] > 0 then
             logGui.buildGuiButton(storage.players[playerIndexString], player)
         end
     end
@@ -35,17 +35,31 @@ local function initStorage()
         for _, platform in pairs(force.platforms) do
             local platformIndexString = tostring(platform.index)
 
-            storage.platforms[forceIndexString][platformIndexString] = {
-                name = platform.name,
-                index = #storage.platformsList[forceIndexString] + 1,
-                leaveTick = 0,
-                arriveTick = 0,
-                platform = platform,
-                entries = {}
-            }
+            if not storage.platforms[forceIndexString][platformIndexString] then
+                storage.platforms[forceIndexString][platformIndexString] = {
+                    name = platform.name,
+                    index = #storage.platformsList[forceIndexString] + 1,
+                    leaveTick = 0,
+                    arriveTick = 0,
+                    platform = platform,
+                    entries = {},
+                    migratedWhileFlying = not platform.space_location
+                }
 
-            table.insert(storage.platformsList[forceIndexString], platformIndexString)
-            table.insert(storage.platformsListDisplay[forceIndexString], platform.name)
+                if platform.space_location then
+                    table.insert(storage.platforms[forceIndexString][platformIndexString].entries, {
+                        leavePlanet = platform.space_location.name,
+                        startWaitingTick = game.tick,
+                        arriveTick = 0,
+                        leaveTick = 0
+                    })
+
+                    storage.platforms[forceIndexString][platformIndexString].arriveTick = game.tick
+                end
+
+                table.insert(storage.platformsList[forceIndexString], platformIndexString)
+                table.insert(storage.platformsListDisplay[forceIndexString], platform.name)
+            end
         end
     end
 end
@@ -118,15 +132,28 @@ eventsLib.events = {
                     arriveTick = 0,
                     leaveTick = 0
                 }
+            end
 
-                for _, player in pairs(platformForce.players) do
-                    local playerIndexString = tostring(player.index)
-                    local globalPlayer = storage.players[playerIndexString]
+            if platformData.migratedWhileFlying then
+                platformData.arriveTick = gameTick
+                platformData.leaveTick = 0
+                platformData.entries[#platformData.entries + 1] = {
+                    leavePlanet = spaceLocation.name,
+                    startWaitingTick = gameTick,
+                    arriveTick = 0,
+                    leaveTick = 0
+                }
 
-                    if globalPlayer.selectedIndex == platformData.index then
-                        if globalPlayer.guis.logGuiMain then
-                            logGui.buildLogGui(globalPlayer, platformData.entries)
-                        end
+                platformData.migratedWhileFlying = false
+            end
+
+            for _, player in pairs(platformForce.players) do
+                local playerIndexString = tostring(player.index)
+                local globalPlayer = storage.players[playerIndexString]
+
+                if globalPlayer.selectedIndex == platformData.index then
+                    if globalPlayer.guis.logGuiMain then
+                        logGui.buildLogGui(globalPlayer, platformData.entries)
                     end
                 end
             end
@@ -155,6 +182,18 @@ eventsLib.events = {
 
 eventsLib.on_init = function()
     initStorage()
+
+    for _, player in pairs(game.players) do
+        initPlayer(player)
+    end
+end
+
+eventsLib.on_configuration_changed = function()
+    initStorage()
+
+    for _, player in pairs(game.players) do
+        initPlayer(player)
+    end
 end
 
 return eventsLib
