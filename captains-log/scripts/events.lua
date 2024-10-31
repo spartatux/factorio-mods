@@ -80,6 +80,7 @@ eventsLib.events = {
         local spaceLocation = platform.space_location
         local forceIndexString = tostring(platformForce.index)
         local platformIndexString = tostring(platform.index)
+        local platformData = storage.platforms[forceIndexString][platformIndexString]
         local gameTick = game.tick
 
         if platformState == spacePlatformStateDefine.paused then
@@ -119,8 +120,6 @@ eventsLib.events = {
                 end
             end
         elseif platformState == spacePlatformStateDefine.waiting_at_station then
-            local platformData = storage.platforms[forceIndexString][platformIndexString]
-
             if platformData.leaveTick > 0 then
                 platformData.entries[#platformData.entries].arriveTick = gameTick
                 platformData.entries[#platformData.entries].arrivePlanet = spaceLocation.name
@@ -158,8 +157,6 @@ eventsLib.events = {
                 end
             end
         elseif platformState == spacePlatformStateDefine.on_the_path then
-            local platformData = storage.platforms[forceIndexString][platformIndexString]
-
             if platformData.arriveTick > 0 then
                 platformData.entries[#platformData.entries].leaveTick = gameTick
                 platformData.leaveTick = gameTick
@@ -174,6 +171,20 @@ eventsLib.events = {
                             logGui.buildLogGui(globalPlayer, platformData.entries)
                         end
                     end
+                end
+            end
+        end
+
+        if platformData and platform.name ~= platformData.name then
+            platformData.name = platform.name
+
+            storage.platformsListDisplay[forceIndexString][platformData.index] = platform.name
+
+            for _, player in pairs(platformForce.players) do
+                local globalPlayerGuis = storage.players[tostring(player.index)].guis
+
+                if globalPlayerGuis.logGuiPlatformListBox and globalPlayerGuis.logGuiPlatformListBox.valid then
+                    globalPlayerGuis.logGuiPlatformListBox.items = storage.platformsListDisplay[forceIndexString]
                 end
             end
         end
