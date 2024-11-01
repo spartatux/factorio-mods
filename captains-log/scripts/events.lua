@@ -2,6 +2,17 @@ local logGui = require("__captains-log__/scripts/gui")
 local spacePlatformStateDefine = defines.space_platform_state
 local eventsDefine = defines.events
 local eventsLib = {}
+local spacePlatformStateDefineToIcon = {
+    [spacePlatformStateDefine.waiting_for_starter_pack] = "[img=waiting-icon]",
+    [spacePlatformStateDefine.starter_pack_requested] = "[img=requested-icon]",
+    [spacePlatformStateDefine.starter_pack_on_the_way] = "[img=on-the-way-icon]",
+    [spacePlatformStateDefine.on_the_path] = "[img=on-the-path-icon]",
+    [spacePlatformStateDefine.waiting_for_departure] = "[img=waiting-for-departure-icon]",
+    [spacePlatformStateDefine.no_schedule] = "[img=no-schedule-icon]",
+    [spacePlatformStateDefine.no_path] = "[img=utility/no_path_icon]",
+    [spacePlatformStateDefine.waiting_at_station] = "[img=waiting-at-station-icon]",
+    [spacePlatformStateDefine.paused] = "[img=pause-icon]"
+}
 
 local function initPlayer(player)
     local playerIndexString = tostring(player.index)
@@ -58,7 +69,7 @@ local function initStorage()
                 end
 
                 table.insert(storage.platformsList[forceIndexString], platformIndexString)
-                table.insert(storage.platformsListDisplay[forceIndexString], platform.name)
+                table.insert(storage.platformsListDisplay[forceIndexString], spacePlatformStateDefineToIcon[platform.state] .. " " .. platform.name)
             end
         end
     end
@@ -80,44 +91,34 @@ eventsLib.events = {
         local spaceLocation = platform.space_location
         local forceIndexString = tostring(platformForce.index)
         local platformIndexString = tostring(platform.index)
-        local platformData = storage.platforms[forceIndexString][platformIndexString]
+        local platforms = storage.platforms[forceIndexString]
+        local platformsList = storage.platformsList[forceIndexString]
+        local platformsListDisplay = storage.platformsListDisplay[forceIndexString]
+        local platformData = platforms[platformIndexString]
+        local globalPlayers = storage.players
+        local firstPlatform = #storage.platformsList[forceIndexString] == 0
         local gameTick = game.tick
 
-        if platformState == spacePlatformStateDefine.paused then
-            if event.old_state ~= spacePlatformStateDefine.on_the_path or event.old_state ~= spacePlatformStateDefine.on_the_path then
-                local firstPlatform = #storage.platformsList[forceIndexString] == 0
+        if not platformData then
+            platforms[platformIndexString] = {
+                name = platform.name,
+                index = #platformsList + 1,
+                leaveTick = 0,
+                arriveTick = gameTick,
+                platform = platform,
+                entries = {}
+            }
 
-                storage.platforms[forceIndexString][platformIndexString] = {
-                    name = platform.name,
-                    index = #storage.platformsList[forceIndexString] + 1,
-                    leaveTick = 0,
-                    arriveTick = gameTick,
-                    platform = platform,
-                    entries = {
-                        {
-                            leavePlanet = spaceLocation.name,
-                            startWaitingTick = gameTick,
-                            arriveTick = 0,
-                            leaveTick = 0
-                        }
-                    }
-                }
+            platformData = platforms[platformIndexString]
 
-                table.insert(storage.platformsList[forceIndexString], platformIndexString)
-                table.insert(storage.platformsListDisplay[forceIndexString], platform.name)
+            table.insert(platformsList, platformIndexString)
+        end
 
-                for _, player in pairs(platformForce.players) do
-                    local playerIndexString = tostring(player.index)
-                    local globalPlayerGuis = storage.players[playerIndexString].guis
-
-                    if firstPlatform then
-                        logGui.buildGuiButton(storage.players[playerIndexString], player)
-                    end
-
-                    if globalPlayerGuis.logGuiPlatformListBox and globalPlayerGuis.logGuiPlatformListBox.valid then
-                        globalPlayerGuis.logGuiPlatformListBox.items = storage.platformsListDisplay[forceIndexString]
-                    end
-                end
+        if platformState == spacePlatformStateDefine.on_the_path then
+            if platformData.arriveTick > 0 then
+                platformData.entries[#platformData.entries].leaveTick = gameTick
+                platformData.leaveTick = gameTick
+                platformData.arriveTick = 0
             end
         elseif platformState == spacePlatformStateDefine.waiting_at_station then
             if platformData.leaveTick > 0 then
@@ -145,46 +146,39 @@ eventsLib.events = {
 
                 platformData.migratedWhileFlying = false
             end
-
-            for _, player in pairs(platformForce.players) do
-                local playerIndexString = tostring(player.index)
-                local globalPlayer = storage.players[playerIndexString]
-
-                if globalPlayer.selectedIndex == platformData.index then
-                    if globalPlayer.guis.logGuiMain then
-                        logGui.buildLogGui(globalPlayer, platformData.entries)
-                    end
-                end
-            end
-        elseif platformState == spacePlatformStateDefine.on_the_path then
-            if platformData.arriveTick > 0 then
-                platformData.entries[#platformData.entries].leaveTick = gameTick
-                platformData.leaveTick = gameTick
-                platformData.arriveTick = 0
-
-                for _, player in pairs(platformForce.players) do
-                    local playerIndexString = tostring(player.index)
-                    local globalPlayer = storage.players[playerIndexString]
-
-                    if globalPlayer.selectedIndex == platformData.index then
-                        if globalPlayer.guis.logGuiMain then
-                            logGui.buildLogGui(globalPlayer, platformData.entries)
-                        end
-                    end
-                end
+        elseif platformState == spacePlatformStateDefine.paused then
+            if event.old_state ~= spacePlatformStateDefine.waiting_at_station and event.old_state ~= spacePlatformStateDefine.on_the_path then
+                platformData.entries[#platformData.entries + 1] = {
+                    leavePlanet = spaceLocation.name,
+                    startWaitingTick = gameTick,
+                    arriveTick = 0,
+                    leaveTick = 0
+                }
             end
         end
 
         if platformData and platform.name ~= platformData.name then
             platformData.name = platform.name
+        end
 
-            storage.platformsListDisplay[forceIndexString][platformData.index] = platform.name
+        platformsListDisplay[platformData.index] = spacePlatformStateDefineToIcon[platformState] .. " " .. platformData.name
 
-            for _, player in pairs(platformForce.players) do
-                local globalPlayerGuis = storage.players[tostring(player.index)].guis
+        for _, player in pairs(platformForce.players) do
+            local playerIndexString = tostring(player.index)
+            local globalPlayer = globalPlayers[playerIndexString]
+            local globalPlayerGuis = globalPlayer.guis
 
-                if globalPlayerGuis.logGuiPlatformListBox and globalPlayerGuis.logGuiPlatformListBox.valid then
-                    globalPlayerGuis.logGuiPlatformListBox.items = storage.platformsListDisplay[forceIndexString]
+            if firstPlatform then
+                logGui.buildGuiButton(storage.players[playerIndexString], player)
+            end
+
+            if globalPlayerGuis.logGuiPlatformListBox and globalPlayerGuis.logGuiPlatformListBox.valid then
+                globalPlayerGuis.logGuiPlatformListBox.items = platformsListDisplay
+            end
+
+            if globalPlayer.selectedIndex == platformData.index then
+                if globalPlayerGuis.logGuiMain then
+                    logGui.buildLogGui(globalPlayer, platformData.entries)
                 end
             end
         end
