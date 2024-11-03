@@ -1,6 +1,6 @@
 {
     "name": "captains-log",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "title": "Captain's Log",
     "author": "LuziferSenpai",
     "contact": "",
@@ -8,7 +8,8 @@
     "description": "Tracking Space Platforms – A star-studded logbook to monitor every platform’s location and status as they drift through the cosmos!",
     "dependencies": [
         "base",
-        "space-age"
+        "space-age",
+        "flib >= 0.15.0"
     ],
     "space_travel_required": true,
     "factorio_version": "2.0"
