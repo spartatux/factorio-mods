@@ -17,7 +17,7 @@ local function checkCircuitNetworkHasSignal(entity, signalId)
 
     if greenCircuitNetwork then
         if greenCircuitNetwork.get_signal(signalId) ~= 0 then
-            game.print("greenNetwork has signal")
+           -- game.print("greenNetwork has signal")
 
             return true
         end
@@ -82,8 +82,7 @@ local function swapRailDirection(railDirection)
     return railDirection == railDirectionDefine.front and railDirectionDefine.back or railDirectionDefine.front
 end
 
-local function attemptUncoupleTrain(train, stationEntity, trainFrontEntity)
-    local decoupleCount = getCircuitNetworkSingalValue(stationEntity, decoupleSignalId)
+local function attemptUncoupleTrain(train, decoupleCount, trainFrontEntity)
     local carriages = train.carriages
 
     if decoupleCount ~= 0 then
@@ -148,8 +147,8 @@ end
 
 local function doTrainCoupleLogic(train)
     local trainIdString = tostring(train.id)
-    local storageTainData = storage.automaticTrainIds[trainIdString]
-    local stationEntity = storageTainData.station
+    local storageTrainData = storage.automaticTrainIds[trainIdString]
+    local stationEntity = storageTrainData.station
 
     storage.automaticTrainIds[trainIdString] = nil
 
@@ -175,7 +174,10 @@ local function doTrainCoupleLogic(train)
             end
         end
 
-        trainFrontEntity = attemptUncoupleTrain(train, stationEntity, trainFrontEntity)
+       local decoupleCount = getCircuitNetworkSingalValue(stationEntity, decoupleSignalId)
+        if decoupleCount ~= 0 then
+            trainFrontEntity = attemptUncoupleTrain(train, decoupleCount, trainFrontEntity)
+        end
 
         if trainFrontEntity then
             didChange = true
@@ -183,7 +185,7 @@ local function doTrainCoupleLogic(train)
             trainFrontEntity = trainBackEntity
         end
 
-        if didChange then
+        if didChange and decoupleCount ~= 0 then
             local frontTrain = trainFrontEntity.train
             local backTrain = trainBackEntity.train
 
@@ -243,9 +245,9 @@ eventsLib.events = {
         end
 
         if eventData.old_state == waitStationDefine then
-            local storageTainData = storage.automaticTrainIds[tostring(train.id)]
+            local storageTrainData = storage.automaticTrainIds[tostring(train.id)]
 
-            if storageTainData then
+            if storageTrainData then
                 doTrainCoupleLogic(train)
             end
         end
