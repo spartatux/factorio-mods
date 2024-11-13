@@ -5,37 +5,37 @@ local wireConnectorIdDefine = defines.wire_connector_id
 local eventsDefine = defines.events
 local eventsLib = {}
 
+---comment
+---@param positionA MapPosition
+---@param positionB MapPosition
+---@return double
+local function getTileDistanceBetweenTwoPositions(positionA, positionB)
+    return math.abs(positionA.x - positionB.x) + math.abs(positionA.y - positionB.y)
+end
+
+---comment
+---@param entity LuaEntity
+---@param signalId any
+---@return boolean
 local function checkCircuitNetworkHasSignal(entity, signalId)
     local redCircuitNetwork = entity.get_circuit_network(wireConnectorIdDefine.circuit_red)
     local greenCircuitNetwork = entity.get_circuit_network(wireConnectorIdDefine.circuit_green)
 
-    if redCircuitNetwork then
-        if redCircuitNetwork.get_signal(signalId) ~= 0 then
-            return true
-        end
-    end
-
-    if greenCircuitNetwork then
-        if greenCircuitNetwork.get_signal(signalId) ~= 0 then
-            return true
-        end
-    end
-
-    return false
+    return (redCircuitNetwork ~= nil and redCircuitNetwork.get_signal(signalId) ~= 0) or (greenCircuitNetwork ~= nil and greenCircuitNetwork.get_signal(signalId) ~= 0)
 end
-
+---comment
+---@param train LuaTrain
+---@return boolean
 local function checkCircuitNetworkHasSignals(train)
     local stationEntity = train.station
 
-    if stationEntity ~= nil then
-        if checkCircuitNetworkHasSignal(stationEntity, coupleSignalId) or checkCircuitNetworkHasSignal(stationEntity, decoupleSignalId) then
-            return true
-        end
-    end
+    return stationEntity ~= nil and (checkCircuitNetworkHasSignal(stationEntity, coupleSignalId) or checkCircuitNetworkHasSignal(stationEntity, decoupleSignalId))
 
-    return false
 end
-
+---comment
+---@param entity LuaEntity
+---@param signalId any
+---@return integer
 local function getCircuitNetworkSingalValue(entity, signalId)
     local redCircuitNetwork = entity.get_circuit_network(wireConnectorIdDefine.circuit_red)
     local greenCircuitNetwork = entity.get_circuit_network(wireConnectorIdDefine.circuit_green)
@@ -52,170 +52,143 @@ local function getCircuitNetworkSingalValue(entity, signalId)
     return signalValue
 end
 
-local function matchEntityOrientation(entityAOrientation, entityBOrientation)
-    return math.abs(entityAOrientation - entityBOrientation) < 0.25 or
-        math.abs(entityAOrientation - entityBOrientation) > 0.75
-end
-
-local function getOrienationBetweenTwoPositions(entityAPosition, entityBPosition)
-    return (math.atan2(entityBPosition.y - entityAPosition.y, entityBPosition.x - entityAPosition.x) / 2 / math.pi + 0.25) % 1
-end
-
-local function getTileDistanceBetweenTwoPositions(positionA, positionB)
-    return math.abs(positionA.x - positionB.x) + math.abs(positionA.y - positionB.y)
-end
-
+---comment
+---@param train LuaTrain
+---@param stationEntity any
+---@return LuaEntity, LuaEntity
 local function getFrontBackTrainEntity(train, stationEntity)
     local trainFrontEntity = train.front_stock
     local trainBackEntity = train.back_stock
 
-    if getTileDistanceBetweenTwoPositions(trainFrontEntity.position, stationEntity.position) < getTileDistanceBetweenTwoPositions(trainBackEntity.position, stationEntity.position) then
+    if trainFrontEntity ~= nil and getTileDistanceBetweenTwoPositions(trainFrontEntity.position, stationEntity.position) < getTileDistanceBetweenTwoPositions(trainBackEntity.position, stationEntity.position) then
         return trainFrontEntity, trainBackEntity
     else
         return trainBackEntity, trainFrontEntity
     end
 end
 
-local function swapRailDirection(railDirection)
-    return railDirection == railDirectionDefine.front and railDirectionDefine.back or railDirectionDefine.front
-end
-
+---@param train LuaTrain
+---@param decoupleCount integer
+---@param trainFrontEntity LuaEntity
+---the first value is the part that has the locomotives the closest to the train stop
+---@return LuaEntity
+---the second value is what left behind
+---@return LuaEntity
 local function attemptUncoupleTrain(train, decoupleCount, trainFrontEntity)
     local carriages = train.carriages
-        if math.abs(decoupleCount) < #carriages then
-            local decoupleDirection = railDirectionDefine.front
-            local targetCount = decoupleCount
-            local targetWagon
 
-            if trainFrontEntity ~= train.front_stock then
-                decoupleCount = decoupleCount * -1
-                targetCount = decoupleCount
-            end
+    local rail_direction
+    -- front end
+    local targetWagon
+    -- back end the part of the train that is left behind
+    local back_end
 
-            if decoupleCount < 0 then
-                decoupleCount = decoupleCount + #carriages
-                targetCount = decoupleCount + 1
-            else
-                decoupleCount = decoupleCount + 1
-            end
-
-            targetWagon = carriages[decoupleCount]
-
-            if not matchEntityOrientation(getOrienationBetweenTwoPositions(targetWagon.position, carriages[targetCount].position), targetWagon.orientation) then
-                decoupleDirection = swapRailDirection(decoupleDirection)
-            end
-            train.manual_mode = true
-            if targetWagon.disconnect_rolling_stock(decoupleDirection) then
-                local targetTrainLocomotives = targetWagon.train.locomotives
-                local trainLocomotives = carriages[targetCount].train.locomotives
-
-                if (#targetTrainLocomotives.front_movers > 0 or #targetTrainLocomotives.back_movers > 0) and targetWagon.train.manual_mode then
-                    targetWagon.train.manual_mode = false
-                else
-                    targetWagon.train.schedule = nil
-                end
-
-                if (#trainLocomotives.front_movers > 0 or #trainLocomotives.back_movers > 0) and targetWagon.train.manual_mode then
-                    carriages[targetCount].train.manual_mode = false
-                else
-                    targetWagon.train.schedule = nil
-                end
-                return targetWagon
-            end
-        end
+    -- if decoupleCount is negatif we start from the end of the train
+    if decoupleCount < 0 then
+        decoupleCount = #carriages + decoupleCount
     end
 
-local function attemptCoupleTrain(stationEntity, trainFrontEntity, coupleCount)
+    if math.abs(decoupleCount) < #carriages then
+        -- by default the disonnection direction is back
+        rail_direction = defines.rail_direction.back
 
+        if trainFrontEntity == train.front_stock then
+            targetWagon = carriages[decoupleCount]
+            back_end = carriages[decoupleCount + 1]
+            -- but if the targetWagon is connected at the front to the back_end, we switch direction
+            if back_end == targetWagon.get_connected_rolling_stock(defines.rail_direction.front) then
+                rail_direction = defines.rail_direction.front
+            end
+        else
+            decoupleCount = (#carriages - decoupleCount) + 1
+            targetWagon = carriages[decoupleCount]
+            back_end = carriages[decoupleCount - 1]
+
+            -- but if the targetWagon is connected at the front to the back_end, we switch direction
+            if back_end == targetWagon.get_connected_rolling_stock(defines.rail_direction.front) then
+                rail_direction = defines.rail_direction.front
+            end
+        end
+            if targetWagon.disconnect_rolling_stock(rail_direction) then
+                return targetWagon, back_end
+            else
+                return nil,nil
+            end
+        end
+        return nil,nil
+    end
+
+    ---@param trainFrontEntity LuaTrain
+    ---@param coupleCount integer
+    ---@return boolean
+local function attemptCoupleTrain( trainFrontEntity, coupleCount)
     if coupleCount ~= 0 then
         local coupleRailDirection = coupleCount < 0 and railDirectionDefine.back or railDirectionDefine.front
-
-        if not matchEntityOrientation(trainFrontEntity.orientation, stationEntity.orientation) then
-            coupleRailDirection = swapRailDirection(coupleRailDirection)
-        end
-
-        if trainFrontEntity.connect_rolling_stock(coupleRailDirection) then
-            return true
-        end
+        return trainFrontEntity.connect_rolling_stock(coupleRailDirection)
     end
-
     return false
 end
 
+---@param train LuaTrain
 local function doTrainCoupleLogic(train)
     local trainIdString = tostring(train.id)
-    local storageTrainData = storage.automaticTrainIds[trainIdString]
-    local stationEntity = storageTrainData.station
+    local stationEntity = storage.automaticTrainIds[trainIdString].station
+    local trainSchedule = train.schedule
+    local currentStation = train.schedule.current
+    local trainGroup = train.group
 
     storage.automaticTrainIds[trainIdString] = nil
 
     if stationEntity and stationEntity.valid then
         local trainFrontEntity, trainBackEntity = getFrontBackTrainEntity(train, stationEntity)
-        local trainSchedule = train.schedule
-        local trainGroup = train.group
-        local didCouple = false
-        local didChange = false
-        
+
+        local motored_end
+        local unmotored_end
+
         local decoupleCount = getCircuitNetworkSingalValue(stationEntity, decoupleSignalId)
         local coupleCount = getCircuitNetworkSingalValue(stationEntity, coupleSignalId)
 
-        if attemptCoupleTrain(stationEntity, trainFrontEntity, coupleCount) then
-            didCouple = true
-            didChange = true
+        if attemptCoupleTrain(trainFrontEntity, coupleCount) then
             train = trainFrontEntity.train
 
             if trainFrontEntity == train.front_stock or trainBackEntity == train.back_stock then
                 trainFrontEntity = train.front_stock
                 trainBackEntity = train.back_stock
-
             else
                 trainFrontEntity = train.back_stock
                 trainBackEntity = train.front_stock
             end
-            trainFrontEntity.train.schedule = trainSchedule
-        else
-            if decoupleCount ~= 0 then
-                trainFrontEntity = attemptUncoupleTrain(train, decoupleCount, trainFrontEntity)
-            end
-        end
-
-            if trainFrontEntity then
-                didChange = true
+            if trainGroup  == nil or trainGroup == "" then
+                trainFrontEntity.train.schedule = trainSchedule
             else
-                trainFrontEntity = trainBackEntity
+                trainFrontEntity.train.group = trainGroup
             end
-
-            local frontTrain = trainFrontEntity.train
-            local backTrain = trainBackEntity.train
-            local frontTrainLocomotives = frontTrain.locomotives
-            local backTrainLocomotives = backTrain.locomotives
-
-            if didChange and decoupleCount ~= 0 then
-
+            trainFrontEntity.train.go_to_station(currentStation)
+        end
+        if decoupleCount ~= 0 then
+            trainFrontEntity, trainBackEntity = attemptUncoupleTrain(train, decoupleCount, trainFrontEntity)
+            if  trainFrontEntity ~= nil and trainBackEntity ~= nil  and (#trainFrontEntity.train.locomotives.front_movers > 0 or #trainFrontEntity.train.locomotives.back_movers > 0) then
+                motored_end = trainFrontEntity
+                unmotored_end = trainBackEntity
+            else
+                motored_end = trainBackEntity
+                unmotored_end = trainFrontEntity
+            end
+            if motored_end then
                 if (#trainGroup > 0) then
-                    if (frontTrainLocomotives ~=  nil) then
-                        frontTrain.group = trainGroup
-                        frontTrain.go_to_station(trainSchedule.current)
-                    end
-                    if (backTrainLocomotives ~=  nil) then
-                        backTrain.group = trainGroup
-                        backTrain.go_to_station(trainSchedule.current)
+                    motored_end.train.group = trainGroup
+                    if unmotored_end then
+                        unmotored_end.train.group = nil
                     end
                 else
-                    if (frontTrainLocomotives ~=  nil and (#frontTrainLocomotives.back_movers > 0 or #frontTrainLocomotives.front_movers > 0)) then
-                        frontTrain.schedule = trainSchedule
-                    end
-                    if (backTrainLocomotives ~=  nil and (#backTrainLocomotives.back_movers > 0 or #backTrainLocomotives.front_movers > 0)) then
-                        backTrain.schedule = trainSchedule
+                    motored_end.train.schedule = trainSchedule
+                    if unmotored_end then
+                        unmotored_end.train.schedule = nil
                     end
                 end
-            frontTrainLocomotives = frontTrain.locomotives
-            backTrainLocomotives = backTrain.locomotives
-       end
-        if  (frontTrainLocomotives.front_movers ~= nil and #frontTrainLocomotives.front_movers > 0) or (frontTrainLocomotives.back_movers and #frontTrainLocomotives.back_movers > 0) or didCouple then
-            frontTrain.manual_mode = false end
-        if (backTrainLocomotives.front_movers ~= nil and #backTrainLocomotives.front_movers > 0) or (backTrainLocomotives.back_movers ~= nil and #backTrainLocomotives.back_movers > 0) or didCouple then
-            backTrain.manual_mode = false end
+                motored_end.train.go_to_station(currentStation)
+            end
+        end
     end
 end
 
@@ -245,18 +218,17 @@ eventsLib.events = {
     [eventsDefine.on_train_changed_state] = function(eventData)
         local train = eventData.train
         local waitStationDefine = defines.train_state.wait_station
-        if train.state == waitStationDefine then
-            if checkCircuitNetworkHasSignals(train) then
-                storage.automaticTrainIds[tostring(train.id)] = { station = train.station }
-            end
-            return
-        end
-
-        if eventData.old_state == waitStationDefine then
-            local storageTrainData = storage.automaticTrainIds[tostring(train.id)]
-            if storageTrainData then
-                doTrainCoupleLogic(train)
-            end
+        if train ~= nil then
+            if train.state == waitStationDefine then
+                if checkCircuitNetworkHasSignals(train) then
+                    storage.automaticTrainIds[tostring(train.id)] = { station = train.station }
+                end
+            elseif eventData.old_state == waitStationDefine then
+                local storageTrainData = storage.automaticTrainIds[tostring(train.id)]
+                if storageTrainData then
+                    doTrainCoupleLogic(train)
+                end
+            end 
         end
     end
 }
@@ -311,4 +283,5 @@ script.on_configuration_changed(function(eventData)
         end
     end
 end)
+
 return eventsLib
