@@ -5,6 +5,165 @@ local wireConnectorIdDefine = defines.wire_connector_id
 local eventsDefine = defines.events
 local eventsLib = {}
 
+
+---@return LuaSurface
+function getHelperSurface()
+    ---@type LuaSurface
+    local helperSurface = storage.scheduleHelperSurface
+    if not helperSurface then
+        local i = 1
+        local name = "RLD Helper"
+        while true do
+            helperSurface = game.get_surface(name)
+            if not helperSurface then
+                break
+            end
+            game.delete_surface(helperSurface)
+            i = i + 1
+            name = "RLD Helper " .. i
+        end
+
+        helperSurface = game.create_surface(
+                name,
+                {
+                    default_enable_all_autoplace_controls = false,
+                    width = 64,
+                    height = 64,
+                    peaceful_mode = true,
+                    no_enemies_mode = true,
+                    property_expression_names = {},
+                }
+        )
+        helperSurface.request_to_generate_chunks({ 0, 0 }, 1)
+        helperSurface.force_generate_chunk_requests()
+        for _, force in pairs(game.forces) do
+            force.set_surface_hidden(helperSurface, true)
+        end
+        storage.scheduleHelperSurface = helperSurface
+    end
+    return helperSurface
+end
+
+---@param train LuaTrain
+---@return LuaItemStack |nil
+    function saveInterrupts(train)
+    
+        local helperSurface = getHelperSurface()
+    
+        ---@type LuaEntity
+        local helperBlueprint = storage.scheduleHelperBlueprint
+        if not helperBlueprint then
+            helperBlueprint = helperSurface.create_entity({
+                name = "item-on-ground",
+                stack = { name = "blueprint", count = 1 },
+                position = { 0, 0 },
+            })
+            storage.scheduleHelperBlueprint = helperBlueprint
+        end
+    
+        local blueprintStack = helperBlueprint.stack
+        blueprintStack.clear_blueprint()
+    
+        local loco = train.locomotives.front_movers[1] or train.locomotives.back_movers[1]
+        local locoPos = loco.position
+    
+        blueprintStack.create_blueprint({
+            surface = loco.surface,
+            force = loco.force,
+            area = {
+                left_top = locoPos,
+                right_bottom = locoPos,
+            },
+            always_include_tiles = false,
+            include_entities = true,
+            include_modules = false,
+            include_station_names = false,
+            include_trains = true,
+            include_fuel = false,
+        })
+        return blueprintStack
+    end
+
+---@param train LuaTrain
+---@param blueprintStack LuaItemStack
+---@param schedule TrainSchedule
+    function loadScheduleWithInterrupt(train,blueprintStack,schedule)
+        ---@type BlueprintScheduleInterrupt[]
+        local currentInterrupts
+        local entries = blueprintStack.get_blueprint_entities()
+        local helperSurface = getHelperSurface()
+        local loco = train.locomotives.front_movers[1] or train.locomotives.back_movers[1]
+        
+        for _, ent in pairs(entries) do
+            if ent.schedule and ent.schedule.interrupts and table_size(ent.schedule.interrupts) > 0 then
+                currentInterrupts = ent.schedule.interrupts
+                for k, v in pairs(schedule) do
+                    ent.schedule[k] = v
+                end
+                break
+            end
+        end
+    
+        if not currentInterrupts then
+            train.schedule = schedule
+            return
+        end
+    
+        blueprintStack.set_blueprint_entities(entries)
+    
+        local ghosts = blueprintStack.build_blueprint {
+            surface = helperSurface,
+            force = loco.force,
+            position = { 16, 16, },
+            build_mode = defines.build_mode.forced,
+            skip_fog_of_war = true,
+            raise_built = false,
+        }
+    
+        local revived = {}
+        local copied
+        for _ = 1, 5 do
+            for k, ghost in pairs(ghosts) do
+                if ghost.valid then
+                    local _, r = ghost.revive { raise_revive = false }
+                    if r then
+                        ghosts[k] = nil
+                        revived[#revived + 1] = r
+                        if r.type == "locomotive" then
+                            loco.copy_settings(r)
+                            copied = true
+                            break
+                        end
+                    end
+                end
+            end
+            if copied then
+                break
+            end
+        end
+    
+        for _ = 1, 2 do
+            for _, ghost in pairs(ghosts) do
+                if ghost.valid then
+                    ghost.destroy()
+                end
+            end
+            for _, r in pairs(revived) do
+                if r.valid then
+                    r.destroy()
+                end
+            end
+        end
+    
+        if not copied then
+            if not setTrainScheduleWithPreserveInterrupts__shown then
+                game.print("Can not save Interrupts. Sorry :(")
+                setTrainScheduleWithPreserveInterrupts__shown = true
+            end
+            train.schedule = schedule
+        end
+    end
+    
 ---comment
 ---@param positionA MapPosition
 ---@param positionB MapPosition
@@ -71,9 +230,9 @@ end
 ---@param decoupleCount integer
 ---@param trainFrontEntity LuaEntity
 ---the first value is the part that has the locomotives the closest to the train stop
----@return LuaEntity
+---@return LuaEntity|nil
 ---the second value is what left behind
----@return LuaEntity
+---@return LuaEntity|nil
 local function attemptUncoupleTrain(train, decoupleCount, trainFrontEntity)
     local carriages = train.carriages
 
@@ -82,7 +241,10 @@ local function attemptUncoupleTrain(train, decoupleCount, trainFrontEntity)
     local targetWagon
     -- back end the part of the train that is left behind
     local back_end
-
+    ---@type LuaItemStack|nil
+    local blueprintStack = saveInterrupts(train)
+    ---@type TrainSchedule
+    local schedule = train.schedule
     -- if decoupleCount is negatif we start from the end of the train
     if decoupleCount < 0 then
         decoupleCount = #carriages + decoupleCount
@@ -110,6 +272,13 @@ local function attemptUncoupleTrain(train, decoupleCount, trainFrontEntity)
             end
         end
             if targetWagon.disconnect_rolling_stock(rail_direction) then
+                if blueprintStack ~= nil then
+                    if #targetWagon.train.locomotives.back_movers > 0 or #targetWagon.train.locomotives.front_movers > 0 then
+                        loadScheduleWithInterrupt(targetWagon.train,blueprintStack,schedule)
+                    else
+                        loadScheduleWithInterrupt(back_end.train,blueprintStack,schedule)
+                    end
+                end
                 return targetWagon, back_end
             else
                 return nil,nil
